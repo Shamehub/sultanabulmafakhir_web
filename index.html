@@ -401,21 +401,17 @@
 
     // 2. Listener Hashchange & Init App (Wajib Ditambahkan)
     function initRouter() {
+      // Tangkap path dari URL Hash saat halaman di-load / di-refresh / di-share
       const getHashPath = () => window.location.hash.replace('#', '') || '/';
 
-      // Jalankan routing sesuai URL saat pertama kali halaman di-load dari Link Share
+      // Jalankan rute saat ini
       handleRouting(getHashPath());
 
-      // Tangkap tombol Back/Forward browser atau perubahan Hash
+      // Tangkap event ketika user menekan tombol Back/Forward browser atau mengubah URL Hash
       window.addEventListener('hashchange', () => {
-        const currentPath = getHashPath();
-        handleRouting(currentPath);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        navigate(getHashPath(), false);
       });
     }
-
-    // Jalankan saat aplikasi pertama kali dibuka
-    window.addEventListener('DOMContentLoaded', initRouter);
 
     // Jalankan Router setelah DOM siap
     window.addEventListener('DOMContentLoaded', initRouter);
