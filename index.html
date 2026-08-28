@@ -425,32 +425,31 @@
       handleRouting(path);
     });
 
-    async function handleRouting(path) {
-      const cleanPath = path.startsWith('/') ? path : '/' + path;
+    function handleRouting(pathname) {
+      const segments = pathname.split('/').filter(Boolean);
+      const mainSection = segments[0] || 'beranda';
+      const itemSlug = segments[1] || null;
 
-      // Jika data global belum siap, tunggu hingga fetch data selesai
-      if (!window.globalData || Object.keys(window.globalData).length === 0) {
-        if (typeof loadGlobalData === 'function') {
-          await loadGlobalData(); // Ganti dengan nama fungsi fetch data Anda jika berbeda
-        }
+      const container = document.getElementById('main-content');
+
+      if (itemSlug) {
+        renderDetailPage(mainSection, itemSlug);
+        return;
       }
 
-      // Routing berdasarkan URL Slug
-      if (cleanPath === '/' || cleanPath === '') {
-        renderBerandaView();
-      } else if (cleanPath.startsWith('/prodi/')) {
-        const slug = cleanPath.replace('/prodi/', '');
-        renderDetailProdiView(slug);
-      } else if (cleanPath.startsWith('/berita/')) {
-        const slug = cleanPath.replace('/berita/', '');
-        renderDetailBeritaView(slug);
-      } else if (cleanPath === '/galeri') {
-        renderGaleriView();
-      } else if (cleanPath === '/download') {
-        renderDownloadView();
-      } else {
-        renderBerandaView();
+      switch (mainSection) {
+        case 'beranda': renderBerandaView(); break;
+        case 'profil': renderProfilView(); break;
+        case 'informasi': renderInformasiView(); break;
+        case 'prodi': renderProdiView(); break;
+        case 'berita': renderBeritaView(); break;
+        case 'galeri': renderGaleriView(); break;
+        case 'download': renderDownloadView(); break;
+        case 'pmb': container.innerHTML = renderPMBForm(); break;
+        default: renderBerandaView(); break;
       }
+
+      lucide.createIcons();
     }
 
     function toggleMobileMenu() {
