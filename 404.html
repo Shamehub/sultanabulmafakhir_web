@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <title>Redirecting...</title>
   <script>
-    // Menyimpan path yang di-refresh (misal: /pmb) ke sessionStorage jika nanti masih dibutuhkan
-    sessionStorage.setItem('redirect_path', window.location.pathname);
-    
-    // Paksa browser kembali ke halaman utama (Beranda)
-    window.location.replace('/');
+    // Simpan path yang diakses lalu alihkan ke index.html
+    sessionStorage.redirect = location.href;
   </script>
+  <meta http-equiv="refresh" content="0;URL='/'">
 </head>
 <body>
 </body>
