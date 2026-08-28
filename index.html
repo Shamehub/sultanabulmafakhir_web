@@ -383,19 +383,38 @@
       }
     }
 
-    function navigate(path, pushToHistory = true) {
-      const cleanPath = path.startsWith('/') ? path : '/' + path;
-      
-      if (pushToHistory) {
-        window.history.pushState({ path: cleanPath }, '', cleanPath);
-      }
-      
-      const mobileMenu = document.getElementById('mobile-menu');
-      if (mobileMenu) mobileMenu.classList.add('hidden');
+    // 1. Fungsi Navigate (Diperbarui menggunakan Hash Routing)
+function navigate(path, pushToHistory = true) {
+  const cleanPath = path.startsWith('/') ? path : '/' + path;
+  
+  if (pushToHistory) {
+    // Ubah URL menggunakan hash (#) agar tidak memicu 404 di GitHub Pages
+    window.location.hash = cleanPath;
+  }
+  
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (mobileMenu) mobileMenu.classList.add('hidden');
 
-      handleRouting(cleanPath);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  handleRouting(cleanPath);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 2. Listener Hashchange & Init App (Wajib Ditambahkan)
+function initRouter() {
+  // Tangkap path dari URL Hash saat halaman di-load / di-refresh / di-share
+  const getHashPath = () => window.location.hash.replace('#', '') || '/';
+
+  // Jalankan rute saat ini
+  handleRouting(getHashPath());
+
+  // Tangkap event ketika user menekan tombol Back/Forward browser atau mengubah URL Hash
+  window.addEventListener('hashchange', () => {
+    navigate(getHashPath(), false);
+  });
+}
+
+// Jalankan Router setelah DOM siap
+window.addEventListener('DOMContentLoaded', initRouter);
 
     window.addEventListener('popstate', (e) => {
       const path = e.state ? e.state.path : window.location.pathname;
