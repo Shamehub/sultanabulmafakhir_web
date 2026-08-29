@@ -1543,92 +1543,92 @@
     }
 
     function renderAdminSidebarMenu() {
-  const sheets = ['Profil', 'Informasi', 'Prodi', 'Berita', 'Galeri', 'Download', 'FormPMB', 'Setting'];
-  const menu = document.getElementById('admin-sheet-menu');
-  
-  if (!menu) return;
+      const sheets = ['Profil', 'Informasi', 'Prodi', 'Berita', 'Galeri', 'Download', 'FormPMB', 'Setting'];
+      const menu = document.getElementById('admin-sheet-menu');
+      
+      if (!menu) return;
 
-  menu.innerHTML = sheets.map(sheet => {
-    let actualKey = Object.keys(globalData || {}).find(k => k.toLowerCase() === sheet.toLowerCase());
-    let count = 0;
-    if (actualKey && globalData[actualKey]) {
-      count = Array.isArray(globalData[actualKey]) ? globalData[actualKey].length : (sheet === 'Setting' ? Object.keys(globalData.Setting || {}).length : 0);
-    }
-    
-    return `
-      <button 
-        onclick="handleAdminMenuClick('${sheet}')" 
-        class="w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center justify-between ${activeAdminSheet === sheet ? 'bg-brand-green text-white font-bold shadow-md' : 'hover:bg-slate-700/60 text-slate-300'}"
-      >
-        <span class="flex items-center gap-2 text-xs">
-          <i data-lucide="file-text" class="w-4 h-4 text-brand-yellow"></i> ${sheet}
-        </span>
-        <span class="text-[10px] bg-slate-900/60 px-2 py-0.5 rounded-full text-slate-300 font-mono">${count}</span>
-      </button>
-    `;
-  }).join('');
+      menu.innerHTML = sheets.map(sheet => {
+        let actualKey = Object.keys(globalData || {}).find(k => k.toLowerCase() === sheet.toLowerCase());
+        let count = 0;
+        if (actualKey && globalData[actualKey]) {
+          count = Array.isArray(globalData[actualKey]) ? globalData[actualKey].length : (sheet === 'Setting' ? Object.keys(globalData.Setting || {}).length : 0);
+        }
+        
+        return `
+          <button 
+            onclick="handleAdminMenuClick('${sheet}')" 
+            class="w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center justify-between ${activeAdminSheet === sheet ? 'bg-brand-green text-white font-bold shadow-md' : 'hover:bg-slate-700/60 text-slate-300'}"
+          >
+            <span class="flex items-center gap-2 text-xs">
+              <i data-lucide="file-text" class="w-4 h-4 text-brand-yellow"></i> ${sheet}
+            </span>
+            <span class="text-[10px] bg-slate-900/60 px-2 py-0.5 rounded-full text-slate-300 font-mono">${count}</span>
+          </button>
+        `;
+      }).join('');
 
-  if (window.lucide) lucide.createIcons();
-}
-
-// Handler Klik Menu Admin
-function handleAdminMenuClick(sheet) {
-  if (typeof switchAdminSheet === 'function') {
-    switchAdminSheet(sheet);
-  } else {
-    activeAdminSheet = sheet;
-    renderAdminSidebarMenu();
-    if (typeof renderAdminSheetView === 'function') renderAdminSheetView(sheet);
-  }
-
-  // Tutup sidebar otomatis hanya di layar Mobile/HP
-  closeAdminSidebar();
-}
-
-// Fungsi Penutup Sidebar Admin (Disesuaikan agar tidak merusak layout)
-function closeAdminSidebar() {
-  // Hanya jalankan penutupan jika di layar Mobile/HP (lebar < 768px)
-  if (window.innerWidth < 768) {
-    const sidebar = document.getElementById('admin-sidebar') || document.getElementById('sidebar-menu');
-    const overlay = document.getElementById('admin-sidebar-overlay') || document.getElementById('sidebar-overlay');
-
-    if (sidebar) {
-      sidebar.classList.add('-translate-x-full');
-      sidebar.classList.remove('translate-x-0');
-      // Pastikan class 'hidden' dihapus jika ada agar tidak membuat area kosong
-      sidebar.classList.remove('hidden'); 
+      if (window.lucide) lucide.createIcons();
     }
 
-    if (overlay) {
-      overlay.classList.add('hidden');
+    // Handler Klik Menu Admin
+    function handleAdminMenuClick(sheet) {
+      if (typeof switchAdminSheet === 'function') {
+        switchAdminSheet(sheet);
+      } else {
+        activeAdminSheet = sheet;
+        renderAdminSidebarMenu();
+        if (typeof renderAdminSheetView === 'function') renderAdminSheetView(sheet);
+      }
+
+      // Tutup sidebar otomatis hanya di layar Mobile/HP
+      closeAdminSidebar();
     }
-  }
-}
 
-// Fungsi Toggle untuk Tombol Hamburger Navigasi Admin
-function toggleAdminSidebar() {
-  const sidebar = document.getElementById('admin-sidebar') || document.getElementById('sidebar-menu');
-  const overlay = document.getElementById('admin-sidebar-overlay') || document.getElementById('sidebar-overlay');
+    // Fungsi Penutup Sidebar Admin (Disesuaikan agar tidak merusak layout)
+    function closeAdminSidebar() {
+      // Hanya jalankan penutupan jika di layar Mobile/HP (lebar < 768px)
+      if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('admin-sidebar') || document.getElementById('sidebar-menu');
+        const overlay = document.getElementById('admin-sidebar-overlay') || document.getElementById('sidebar-overlay');
 
-  if (!sidebar) return;
+        if (sidebar) {
+          sidebar.classList.add('-translate-x-full');
+          sidebar.classList.remove('translate-x-0');
+          // Pastikan class 'hidden' dihapus jika ada agar tidak membuat area kosong
+          sidebar.classList.remove('hidden'); 
+        }
 
-  // Pastikan class hidden dilepas
-  sidebar.classList.remove('hidden');
+        if (overlay) {
+          overlay.classList.add('hidden');
+        }
+      }
+    }
 
-  const isClosed = sidebar.classList.contains('-translate-x-full');
+    // Fungsi Toggle untuk Tombol Hamburger Navigasi Admin
+    function toggleAdminSidebar() {
+      const sidebar = document.getElementById('admin-sidebar') || document.getElementById('sidebar-menu');
+      const overlay = document.getElementById('admin-sidebar-overlay') || document.getElementById('sidebar-overlay');
 
-  if (isClosed) {
-    // Buka Sidebar
-    sidebar.classList.remove('-translate-x-full');
-    sidebar.classList.add('translate-x-0');
-    if (overlay) overlay.classList.remove('hidden');
-  } else {
-    // Tutup Sidebar
-    sidebar.classList.add('-translate-x-full');
-    sidebar.classList.remove('translate-x-0');
-    if (overlay) overlay.classList.add('hidden');
-  }
-}
+      if (!sidebar) return;
+
+      // Pastikan class hidden dilepas
+      sidebar.classList.remove('hidden');
+
+      const isClosed = sidebar.classList.contains('-translate-x-full');
+
+      if (isClosed) {
+        // Buka Sidebar
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+        if (overlay) overlay.classList.remove('hidden');
+      } else {
+        // Tutup Sidebar
+        sidebar.classList.add('-translate-x-full');
+        sidebar.classList.remove('translate-x-0');
+        if (overlay) overlay.classList.add('hidden');
+      }
+    }
 
     function renderAdminStats() {
       let pmbKey = Object.keys(globalData).find(k => k.toLowerCase() === 'formpmb') || 'FormPMB';
