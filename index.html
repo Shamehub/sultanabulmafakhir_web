@@ -69,8 +69,8 @@
   <div id="splash-screen" class="fixed inset-0 z-[100] bg-brand-green flex flex-col items-center justify-center text-white transition-opacity duration-1000">
     <div class="text-center p-6 space-y-4 animate-pulse">
       <img id="splash-logo" src="https://lh3.googleusercontent.com/d/1I1FeGlzNvVlVtNCq24muTdzxM083ORuv" class="w-28 h-28 mx-auto drop-shadow-lg rounded-full bg-white p-2" alt="Logo">
-      <h1 id="splash-title" class="text-2xl md:text-2xl font-arabic tracking-wide text-brand-white">المعهد العالي السلطان ابو المفاخر </h1>
-      <p id="splash-arabic" class="font-extra bold text-xl md:text-3x2 text-brand-yellow">MA'HAD ALY SULTAN ABUL MAFAKHIR</p>
+      <h1 id="splash-title" class="text-3xl md:text-3xl font-arabic tracking-wide text-brand-white">المعهد العالي السلطان ابو المفاخر </h1>
+      <p id="splash-arabic" class="font-bold text-md md:text-2xl text-brand-yellow">MA'HAD ALY SULTAN ABUL MAFAKHIR</p>
       <p id="splash-tagline" class="text-sm italic opacity-90">Mencetak Kader Ulama Tafaqquh Fiddin</p>
       <div class="w-12 h-12 border-4 border-brand-yellow border-t-transparent rounded-full animate-spin mx-auto mt-6"></div>
     </div>
@@ -123,13 +123,14 @@
       </div>
     </header>
 
-    <main id="main-content" class="flex-grow max-w-[1400px] w-full mx-auto p-4 md:p-8">
+    <main id="main-content" class="w-full max-w-7xl mx-auto px-4 py-6 overflow-hidden">
+      <!-- Konten view (Download, Beranda, Galeri, dll) -->
     </main>
 
     <footer id="public-footer" class="bg-brand-green text-white text-sm border-t-4 border-brand-yellow mt-12">
       <div class="max-w-7xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-8">
         <div>
-          <h3 id="footer-title" class="font-bold text-lg text-white mb-2">MA'HAD ALY SULTAN ABUL MAFAKHIR</h3>
+          <h3 id="footer-title" class="font-bold text-lg text-white mb-2">MA'HAD ALY</h3>
           <p id="footer-arabic" class="font-arabic text-brand-yellow text-base mb-2"></p>
           <p id="footer-address" class="text-xs text-emerald-100 leading-relaxed"></p>
         </div>
@@ -144,7 +145,7 @@
         </div>
         <div>
           <h4 class="font-bold text-brand-yellow mb-2">Kontak & Informasi</h4>
-          <p class="text-xs text-emerald-100">Email: info@mahadaly-sam.ac.id</p>
+          <p class="text-xs text-emerald-100">Email: abulmafakhirsultan@gmail.com</p>
           <p class="text-xs text-emerald-100 mt-1">Alamat: Kresek, Tangerang - Banten 15620</p>
         </div>
       </div>
@@ -472,8 +473,9 @@
           <div class="bg-gradient-to-r from-brand-green to-emerald-900 rounded-2xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between">
             <div class="space-y-4 max-w-2xl z-10">
               <span class="bg-brand-yellow/20 text-brand-yellow text-xs px-3 py-1 rounded-full font-semibold border border-brand-yellow/40">Mencetak Ulama Tafaqquh Fiddin</span>
-              <h2 class="text-3xl md:text-5xl font-extrabold leading-tight">Selamat Datang di ${globalData.Setting?.site_name || 'Ma\'had Aly SAM'}</h2>
-              <p class="font-arabic text-2xl text-brand-yellow">${globalData.Setting?.arabic_name || ''}</p>
+              <h5 class="text-xl md:text-xl font-extrabold leading-tight">Selamat Datang di</h5> 
+                <p class="font-bold text-3xl text-brand-yellow">${globalData.Setting?.site_name || ''}</p>
+              <p class="font-arabic text-2xl text-brand-white">${globalData.Setting?.arabic_name || ''}</p>
               <p class="text-sm md:text-base opacity-90">${globalData.Setting?.tagline || ''}</p>
               <div class="pt-4 flex flex-wrap gap-3">
                 <button onclick="navigate('/pmb')" class="bg-brand-yellow text-slate-900 font-bold px-6 py-3 rounded-lg shadow hover:bg-yellow-400 transition">Pendaftaran PMB</button>
