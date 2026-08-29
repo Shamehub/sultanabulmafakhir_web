@@ -1542,19 +1542,58 @@
       const sheets = ['Profil', 'Informasi', 'Prodi', 'Berita', 'Galeri', 'Download', 'FormPMB', 'Setting'];
       const menu = document.getElementById('admin-sheet-menu');
       
+      if (!menu) return;
+
       menu.innerHTML = sheets.map(sheet => {
-        let actualKey = Object.keys(globalData).find(k => k.toLowerCase() === sheet.toLowerCase());
+        let actualKey = Object.keys(globalData || {}).find(k => k.toLowerCase() === sheet.toLowerCase());
         let count = 0;
         if (actualKey && globalData[actualKey]) {
           count = Array.isArray(globalData[actualKey]) ? globalData[actualKey].length : (sheet === 'Setting' ? Object.keys(globalData.Setting || {}).length : 0);
         }
+        
         return `
-          <button onclick="switchAdminSheet('${sheet}')" class="w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center justify-between ${activeAdminSheet === sheet ? 'bg-brand-green text-white font-bold shadow-md' : 'hover:bg-slate-700/60 text-slate-300'}">
-            <span class="flex items-center gap-2 text-xs"><i data-lucide="file-text" class="w-4 h-4 text-brand-yellow"></i> ${sheet}</span>
+          <button 
+            onclick="handleAdminMenuClick('${sheet}')" 
+            class="w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center justify-between ${activeAdminSheet === sheet ? 'bg-brand-green text-white font-bold shadow-md' : 'hover:bg-slate-700/60 text-slate-300'}"
+          >
+            <span class="flex items-center gap-2 text-xs">
+              <i data-lucide="file-text" class="w-4 h-4 text-brand-yellow"></i> ${sheet}
+            </span>
             <span class="text-[10px] bg-slate-900/60 px-2 py-0.5 rounded-full text-slate-300 font-mono">${count}</span>
           </button>
         `;
       }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // 1. Function Toggle Bawaan Anda (Dipertahankan)
+    function toggleAdminSidebar() {
+      const sidebar = document.getElementById('admin-sidebar');
+      if (sidebar) sidebar.classList.toggle('hidden');
+    }
+
+    // 2. Function Tutup Sidebar Otomatis saat Menu Diklik
+    function closeAdminSidebar() {
+      // Hanya tutup otomatis di layar HP/Mobile (lebar layar < 768px)
+      if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('admin-sidebar');
+        if (sidebar) sidebar.classList.add('hidden');
+      }
+    }
+
+    // 3. Wrapper Handler saat Menu Diklik
+    function handleAdminMenuClick(sheet) {
+      if (typeof switchAdminSheet === 'function') {
+        switchAdminSheet(sheet);
+      } else {
+        activeAdminSheet = sheet;
+        renderAdminSidebarMenu();
+        if (typeof renderAdminSheetView === 'function') renderAdminSheetView(sheet);
+      }
+
+      // Panggil penutup sidebar
+      closeAdminSidebar();
     }
 
     function renderAdminStats() {
