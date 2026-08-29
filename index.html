@@ -1532,7 +1532,8 @@
     }
 
     function toggleAdminSidebar() {
-      document.getElementById('admin-sidebar').classList.toggle('hidden');
+      const sidebar = document.getElementById('admin-sidebar');
+      if (sidebar) sidebar.classList.toggle('hidden');
     }
 
     function renderAdminDashboard() {
