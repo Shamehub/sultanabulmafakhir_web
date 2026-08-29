@@ -944,21 +944,21 @@
                     </div>
                   </div>
 
-                  <!-- Fixed & Visible Download Button -->
-                  const rawUrl = d.url_file || d.url || d.link || '#';
-                  const directUrl = getDirectDownloadUrl(rawUrl);
+                  ${(() => {
+                    const rawUrl = d.url_file || d.url || d.link || '#';
+                    const directUrl = getDirectDownloadUrl(rawUrl);
 
-                  return `
-                    <!-- Tombol Unduh Direct -->
-                    <a 
-                      href="${directUrl}" 
-                      download="${fileName}"
-                      class="shrink-0 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2.5 md:px-4 md:py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-700/20 hover:shadow-lg"
-                    >
-                      <i data-lucide="download" class="w-4 h-4"></i>
-                      <span class="text-xs font-semibold">Unduh</span>
-                    </a>
-                  `;
+                    return `
+                      <a 
+                        href="${directUrl}" 
+                        download="${fileName}"
+                        class="shrink-0 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2.5 md:px-4 md:py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-700/20 hover:shadow-lg"
+                      >
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span class="text-xs font-semibold">Unduh</span>
+                      </a>
+                    `;
+                  })()}
 
                 </div>
               `;
