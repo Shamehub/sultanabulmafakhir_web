@@ -967,135 +967,135 @@
     }
 
     function renderDetailPage(section, slug) {
-  const container = document.getElementById('main-content');
-  if (!container) return;
+      const container = document.getElementById('main-content');
+      if (!container) return;
 
-  if (section === 'berita') {
-    const item = (globalData.Berita || []).find(b => slugify(b.judul) === slug);
-    if (!item) { renderNotFound(); return; }
+      if (section === 'berita') {
+        const item = (globalData.Berita || []).find(b => slugify(b.judul) === slug);
+        if (!item) { renderNotFound(); return; }
 
-    container.innerHTML = `
-      <div class="max-w-4xl mx-auto space-y-6">
-        <button onclick="navigate('/berita')" class="text-xs font-semibold text-brand-green flex items-center gap-1 hover:underline mb-2">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Berita
-        </button>
-        <img src="${item.gambar || 'https://via.placeholder.com/800x400'}" class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-lg" alt="${item.judul}">
-        <div class="space-y-2">
-          <div class="text-xs text-slate-400 font-medium">${item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : ''} • Oleh ${item.penulis || 'Admin'}</div>
-          <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 leading-tight">${item.judul}</h1>
-        </div>
-        <div class="prose max-w-none text-slate-700 leading-relaxed whitespace-pre-line text-sm md:text-base border-t pt-6">
-          ${item.konten}
-        </div>
-      </div>
-    `;
-  }
-  else if (section === 'prodi') {
-    const item = (globalData.Prodi || []).find(p => slugify(p.nama_prodi) === slug);
-    if (!item) { renderNotFound(); return; }
-
-    container.innerHTML = `
-      <div class="max-w-4xl mx-auto space-y-6 bg-white p-8 rounded-2xl shadow-md border border-slate-100">
-        <button onclick="navigate('/prodi')" class="text-xs font-semibold text-brand-green flex items-center gap-1 hover:underline mb-2">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Program Studi
-        </button>
-        <div class="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
-          <div>
-            <h1 class="text-3xl font-extrabold text-brand-green">${item.nama_prodi}</h1>
-            <p class="text-sm text-slate-500 mt-1">Gelar Lulusan: <b>${item.gelar}</b></p>
-          </div>
-          <span class="bg-brand-yellow text-slate-900 font-bold px-4 py-1.5 rounded-full text-xs">Akreditasi: ${item.akreditasi || 'Baik'}</span>
-        </div>
-        <div class="space-y-4 text-slate-700 leading-relaxed text-sm md:text-base">
-          <h3 class="font-bold text-lg text-slate-800">Deskripsi & Kurikulum Program Studi</h3>
-          <p class="whitespace-pre-line">${item.deskripsi}</p>
-        </div>
-        <div class="pt-6 border-t flex justify-end">
-          <button onclick="navigate('/pmb')" class="bg-brand-green text-white font-bold px-6 py-2.5 rounded-lg shadow hover:bg-emerald-800 transition">Daftar Prodi Ini</button>
-        </div>
-      </div>
-    `;
-  }
-  else if (section === 'informasi') {
-    const item = (globalData.Informasi || []).find(inf => slugify(inf.judul) === slug);
-    if (!item) { renderNotFound(); return; }
-
-    container.innerHTML = `
-      <div class="max-w-3xl mx-auto space-y-6 bg-white p-8 rounded-2xl shadow-md border border-slate-100">
-        <button onclick="navigate('/informasi')" class="text-xs font-semibold text-brand-green flex items-center gap-1 hover:underline mb-2">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Pengumuman
-        </button>
-        <div class="flex justify-between items-center text-xs">
-          <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-bold">${item.kategori || 'Umum'}</span>
-          <span class="text-slate-400">${item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : ''}</span>
-        </div>
-        <h1 class="text-2xl md:text-3xl font-bold text-slate-900 leading-snug">${item.judul}</h1>
-        <div class="text-slate-700 leading-relaxed whitespace-pre-line text-sm md:text-base border-t pt-4">
-          ${item.isi}
-        </div>
-      </div>
-    `;
-  }
-  /* PENAMBAHAN ROUTE PROFIL DETAIL */
-  else if (section === 'profil') {
-    const item = (globalData.Profil || []).find(p => {
-      const title = p.judul || p.kategori || p.nama || '';
-      return slugify(title) === slug;
-    });
-
-    if (!item) { renderNotFound(); return; }
-
-    const title = item.judul || item.kategori || item.nama || 'Profil Lembaga';
-    const category = item.kategori || item.jenis || 'INFORMASI';
-    const content = item.isi || item.deskripsi || item.keterangan || '';
-
-    container.innerHTML = `
-      <div class="max-w-4xl mx-auto space-y-6">
-        <button onclick="navigate('/profil')" class="text-xs font-semibold text-emerald-700 flex items-center gap-1 hover:underline mb-2">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Profil Lembaga
-        </button>
-
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
-          <!-- Header Banner -->
-          <div class="bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 p-8 md:p-10 text-white relative">
-            <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none">
-              <i data-lucide="landmark" class="w-64 h-64 text-amber-300"></i>
-            </div>
-            <div class="relative z-10 space-y-3">
-              <span class="text-[10px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
-                ${category}
-              </span>
-              <h1 class="text-2xl md:text-4xl font-extrabold text-white leading-tight">
-                ${title}
-              </h1>
-              <p class="text-xs text-emerald-200/80 flex items-center gap-1.5 pt-1">
-                <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> Document Resmi Ma'had Aly Sultan Abul Mafakhir
-              </p>
-            </div>
-          </div>
-
-          <!-- Body Content -->
-          <div class="p-6 md:p-10 text-slate-700 leading-relaxed whitespace-pre-line text-sm md:text-base border-t border-slate-100">
-            ${content}
-          </div>
-
-          <!-- Footer Bar -->
-          <div class="px-6 md:px-10 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-            <span>Ma'had Aly Sultan Abul Mafakhir</span>
-            <button onclick="navigate('/profil')" class="font-bold text-emerald-700 hover:text-emerald-900">
-              Lihat Profil Lainnya &rarr;
+        container.innerHTML = `
+          <div class="max-w-4xl mx-auto space-y-6">
+            <button onclick="navigate('/berita')" class="text-xs font-semibold text-brand-green flex items-center gap-1 hover:underline mb-2">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Berita
             </button>
+            <img src="${item.gambar || 'https://via.placeholder.com/800x400'}" class="w-full h-72 md:h-96 object-cover rounded-2xl shadow-lg" alt="${item.judul}">
+            <div class="space-y-2">
+              <div class="text-xs text-slate-400 font-medium">${item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : ''} • Oleh ${item.penulis || 'Admin'}</div>
+              <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 leading-tight">${item.judul}</h1>
+            </div>
+            <div class="prose max-w-none text-slate-700 leading-relaxed whitespace-pre-line text-sm md:text-base border-t pt-6">
+              ${item.konten}
+            </div>
           </div>
-        </div>
-      </div>
-    `;
-  } 
-  else {
-    renderNotFound();
-  }
+        `;
+      }
+      else if (section === 'prodi') {
+        const item = (globalData.Prodi || []).find(p => slugify(p.nama_prodi) === slug);
+        if (!item) { renderNotFound(); return; }
 
-  if (window.lucide) lucide.createIcons();
-}
+        container.innerHTML = `
+          <div class="max-w-4xl mx-auto space-y-6 bg-white p-8 rounded-2xl shadow-md border border-slate-100">
+            <button onclick="navigate('/prodi')" class="text-xs font-semibold text-brand-green flex items-center gap-1 hover:underline mb-2">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Program Studi
+            </button>
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+              <div>
+                <h1 class="text-3xl font-extrabold text-brand-green">${item.nama_prodi}</h1>
+                <p class="text-sm text-slate-500 mt-1">Gelar Lulusan: <b>${item.gelar}</b></p>
+              </div>
+              <span class="bg-brand-yellow text-slate-900 font-bold px-4 py-1.5 rounded-full text-xs">Akreditasi: ${item.akreditasi || 'Baik'}</span>
+            </div>
+            <div class="space-y-4 text-slate-700 leading-relaxed text-sm md:text-base">
+              <h3 class="font-bold text-lg text-slate-800">Deskripsi & Kurikulum Program Studi</h3>
+              <p class="whitespace-pre-line">${item.deskripsi}</p>
+            </div>
+            <div class="pt-6 border-t flex justify-end">
+              <button onclick="navigate('/pmb')" class="bg-brand-green text-white font-bold px-6 py-2.5 rounded-lg shadow hover:bg-emerald-800 transition">Daftar Prodi Ini</button>
+            </div>
+          </div>
+        `;
+      }
+      else if (section === 'informasi') {
+        const item = (globalData.Informasi || []).find(inf => slugify(inf.judul) === slug);
+        if (!item) { renderNotFound(); return; }
+
+        container.innerHTML = `
+          <div class="max-w-3xl mx-auto space-y-6 bg-white p-8 rounded-2xl shadow-md border border-slate-100">
+            <button onclick="navigate('/informasi')" class="text-xs font-semibold text-brand-green flex items-center gap-1 hover:underline mb-2">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Pengumuman
+            </button>
+            <div class="flex justify-between items-center text-xs">
+              <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-bold">${item.kategori || 'Umum'}</span>
+              <span class="text-slate-400">${item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : ''}</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 leading-snug">${item.judul}</h1>
+            <div class="text-slate-700 leading-relaxed whitespace-pre-line text-sm md:text-base border-t pt-4">
+              ${item.isi}
+            </div>
+          </div>
+        `;
+      }
+      /* PENAMBAHAN ROUTE PROFIL DETAIL */
+      else if (section === 'profil') {
+        const item = (globalData.Profil || []).find(p => {
+          const title = p.judul || p.kategori || p.nama || '';
+          return slugify(title) === slug;
+        });
+
+        if (!item) { renderNotFound(); return; }
+
+        const title = item.judul || item.kategori || item.nama || 'Profil Lembaga';
+        const category = item.kategori || item.jenis || 'INFORMASI';
+        const content = item.isi || item.deskripsi || item.keterangan || '';
+
+        container.innerHTML = `
+          <div class="max-w-4xl mx-auto space-y-6">
+            <button onclick="navigate('/profil')" class="text-xs font-semibold text-emerald-700 flex items-center gap-1 hover:underline mb-2">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Profil Lembaga
+            </button>
+
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+              <!-- Header Banner -->
+              <div class="bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 p-8 md:p-10 text-white relative">
+                <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none">
+                  <i data-lucide="landmark" class="w-64 h-64 text-amber-300"></i>
+                </div>
+                <div class="relative z-10 space-y-3">
+                  <span class="text-[10px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
+                    ${category}
+                  </span>
+                  <h1 class="text-2xl md:text-4xl font-extrabold text-white leading-tight">
+                    ${title}
+                  </h1>
+                  <p class="text-xs text-emerald-200/80 flex items-center gap-1.5 pt-1">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> Document Resmi Ma'had Aly Sultan Abul Mafakhir
+                  </p>
+                </div>
+              </div>
+
+              <!-- Body Content -->
+              <div class="p-6 md:p-10 text-slate-700 leading-relaxed whitespace-pre-line text-sm md:text-base border-t border-slate-100">
+                ${content}
+              </div>
+
+              <!-- Footer Bar -->
+              <div class="px-6 md:px-10 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                <span>Ma'had Aly Sultan Abul Mafakhir</span>
+                <button onclick="navigate('/profil')" class="font-bold text-emerald-700 hover:text-emerald-900">
+                  Lihat Profil Lainnya &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      } 
+      else {
+        renderNotFound();
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
 
     function renderNotFound() {
       document.getElementById('main-content').innerHTML = `
