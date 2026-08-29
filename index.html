@@ -887,50 +887,77 @@
     });
 
     function renderDownloadView() {
+      const items = globalData.Download || [];
+
       document.getElementById('main-content').innerHTML = `
-        <div class="space-y-8 max-w-7xl mx-auto">
-          <!-- Header Section -->
-          <div class="border-b-2 border-brand-yellow pb-3">
-            <h2 class="text-2xl font-bold text-brand-green flex items-center gap-2">
-              <i data-lucide="file-text" class="w-7 h-7 text-brand-green"></i>
-              Pusat Unduhan Berkas
-            </h2>
-            <p class="text-xs text-slate-500 mt-1">Unduh dokumen resmi, panduan, dan formulir akademis Ma'had Aly.</p>
+        <div class="space-y-6 max-w-7xl mx-auto px-1 sm:px-0">
+          
+          <!-- Premium Header Card -->
+          <div class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-brand-green rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+              <i data-lucide="file-text" class="w-64 h-64"></i>
+            </div>
+            <div class="relative z-10 space-y-2">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-700/50 backdrop-blur border border-emerald-500/30 text-emerald-200 text-xs font-semibold">
+                <i data-lucide="folder-open" class="w-3.5 h-3.5"></i> Repository Akademis
+              </div>
+              <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight">Pusat Unduhan Berkas</h2>
+              <p class="text-xs md:text-sm text-emerald-100/90 max-w-xl leading-relaxed">
+                Akses dan unduh dokumen resmi, panduan akademik, serta formulir pendaftaran Ma'had Aly secara langsung.
+              </p>
+            </div>
           </div>
 
           <!-- Grid Cards -->
-          <div class="grid md:grid-cols-2 gap-5">
-            ${(globalData.Download || []).map(d => `
-              <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex items-center justify-between gap-4 group">
-                
-                <!-- Information Box -->
-                <div class="flex items-center gap-4 min-w-0">
-                  <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-brand-green group-hover:text-white transition-colors duration-300">
-                    <i data-lucide="file-down" class="w-6 h-6"></i>
-                  </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${items.length === 0 ? `
+              <div class="col-span-full bg-white rounded-2xl p-12 text-center border border-slate-100 text-slate-400">
+                <i data-lucide="folder-search" class="w-12 h-12 mx-auto mb-3 stroke-1"></i>
+                <p class="text-sm">Belum ada dokumen yang tersedia saat ini.</p>
+              </div>
+            ` : items.map(d => {
+              const fileUrl = d.url_file || d.url || d.link || '#';
+              const fileName = d.nama_file || d.judul || 'Berkas Dokumen';
+              const fileDesc = d.deskripsi || d.kategori || 'Dokumen Resmi';
+              const fileSize = d.ukuran || d.size || '';
 
-                  <div class="space-y-1 min-w-0">
-                    <h3 class="font-bold text-slate-800 text-sm md:text-base leading-snug truncate group-hover:text-brand-green transition-colors">
-                      ${d.nama_file || 'Berkas Dokumen'}
-                    </h3>
-                    <div class="flex items-center gap-2 text-xs text-slate-500">
-                      <span class="truncate">${d.deskripsi || 'Dokumen Resmi'}</span>
-                      ${d.ukuran ? `
-                        <span class="inline-block w-1 h-1 rounded-full bg-slate-300"></span>
-                        <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono text-[10px] font-semibold">${d.ukuran}</span>
-                      ` : ''}
+              return `
+                <div class="bg-white rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-between gap-3 group">
+                  
+                  <!-- Icon & Text Info -->
+                  <div class="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+                    <div class="w-11 h-11 md:w-12 md:h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                      <i data-lucide="file-down" class="w-5 h-5 md:w-6 md:h-6"></i>
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                      <h3 class="font-bold text-slate-800 text-xs md:text-sm leading-snug break-words group-hover:text-emerald-700 transition-colors line-clamp-2">
+                        ${fileName}
+                      </h3>
+                      <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-400 mt-1">
+                        <span class="truncate max-w-[140px]">${fileDesc}</span>
+                        ${fileSize ? `
+                          <span class="inline-block w-1 h-1 rounded-full bg-slate-300"></span>
+                          <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-mono text-[10px] font-semibold shrink-0">${fileSize}</span>
+                        ` : ''}
+                      </div>
                     </div>
                   </div>
+
+                  <!-- Fixed & Visible Download Button -->
+                  <a 
+                    href="${fileUrl}" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="shrink-0 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3.5 py-2.5 md:px-4 md:py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-700/20 hover:shadow-lg"
+                  >
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="text-xs font-semibold">Unduh</span>
+                  </a>
+
                 </div>
-
-                <!-- Download Button -->
-                <a href="${d.url_file || '#'}" target="_blank" class="shrink-0 bg-brand-green hover:bg-emerald-800 text-white px-4 py-2.5 rounded-xl font-medium text-xs flex items-center gap-2 transition-all shadow-md shadow-emerald-900/10 hover:shadow-lg hover:scale-105 active:scale-95">
-                  <i data-lucide="download" class="w-4 h-4"></i>
-                  <span class="hidden sm:inline">Unduh</span>
-                </a>
-
-              </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         </div>
       `;
