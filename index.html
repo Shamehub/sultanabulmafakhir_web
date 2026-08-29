@@ -1583,6 +1583,16 @@
       `).join('');
     }
 
+    function closeAdminSidebar() {
+      // Hanya tutup jika lebar layar kurang dari 768px (Mobile/Tablet)
+      if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('admin-sidebar');
+        if (sidebar) {
+          sidebar.classList.add('hidden'); // atau sidebar.classList.add('-translate-x-full');
+        }
+      }
+    }
+
     function switchAdminSheet(sheetName) {
       activeAdminSheet = sheetName;
       renderAdminSidebarMenu();
