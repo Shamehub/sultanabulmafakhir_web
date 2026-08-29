@@ -470,13 +470,13 @@
 
       // Helper konversi ID Google Drive atau URL langsung
       const getImageUrl = (urlOrId) => {
-        if (!urlOrId) return 'https://drive.google.com/file/d/1q0Ew2uEYk4-F-z9O4c7-hLNOcbi75-of';
+        if (!urlOrId) return '';
         if (urlOrId.includes('http')) return urlOrId;
         return `https://lh3.googleusercontent.com/d/${urlOrId}`;
       };
 
       // Mengambil gambar dari sheet Pengaturan (Hero Image)
-      const heroImageRaw = globalData.Setting?.hero_image || globalData.Setting?.gambar_hero || globalData.Setting?.banner || '1Kj76z4Fxl4rtVD75-xsAQmyVWJgJOZ_M';
+      const heroImageRaw = globalData.Setting?.hero_image || globalData.Setting?.gambar_hero || globalData.Setting?.banner || '';
       const heroImageUrl = getImageUrl(heroImageRaw);
 
       container.innerHTML = `
