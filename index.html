@@ -523,16 +523,21 @@
 
               <!-- Gambar Kanan Dinamis (Bisa diatur dari sheet Pengaturan) -->
               <div class="w-full md:w-auto shrink-0 flex justify-center md:justify-end">
-                <div class="relative group">
-                  <div class="absolute -inset-1 bg-gradient-to-r from-amber-400 to-emerald-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-                  <img 
-                    src="${heroImageUrl}" 
-                    alt="Ma'had Aly Hero Image" 
-                    class="relative w-64 md:w-80 h-auto max-h-80 object-contain rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-105"
-                    onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/d/1Kj76z4Fxl4rtVD75-xsAQmyVWJgJOZ_M';"
-                  />
-                </div>
-              </div>
+  <div class="relative group">
+    <!-- Glow Background Shadow -->
+    <div class="absolute -inset-1 bg-gradient-to-r from-amber-400/40 to-emerald-500/40 rounded-[50%] blur-xl opacity-50 group-hover:opacity-80 transition duration-500"></div>
+    
+    <!-- Frame Gambar Oval dengan Border dan Shadow -->
+    <div class="relative w-64 md:w-72 h-80 md:h-96 rounded-[50%] p-1.5 bg-gradient-to-b from-amber-400/80 via-amber-300/40 to-emerald-600/60 shadow-2xl shadow-black/40 border border-white/20">
+      <img 
+        src="${heroImageUrl}" 
+        alt="Ma'had Aly Hero Image" 
+        class="w-full h-full object-cover rounded-[50%] transition-transform duration-500 group-hover:scale-105"
+        onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/d/1Kj76z4Fxl4rtVD75-xsAQmyVWJgJOZ_M';"
+      />
+    </div>
+  </div>
+</div>
 
             </div>
 
