@@ -1546,19 +1546,60 @@
       const sheets = ['Profil', 'Informasi', 'Prodi', 'Berita', 'Galeri', 'Download', 'FormPMB', 'Setting'];
       const menu = document.getElementById('admin-sheet-menu');
       
+      if (!menu) return;
+
       menu.innerHTML = sheets.map(sheet => {
-        let actualKey = Object.keys(globalData).find(k => k.toLowerCase() === sheet.toLowerCase());
+        let actualKey = Object.keys(globalData || {}).find(k => k.toLowerCase() === sheet.toLowerCase());
         let count = 0;
         if (actualKey && globalData[actualKey]) {
           count = Array.isArray(globalData[actualKey]) ? globalData[actualKey].length : (sheet === 'Setting' ? Object.keys(globalData.Setting || {}).length : 0);
         }
+        
         return `
-          <button onclick="switchAdminSheet('${sheet}')" class="w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center justify-between ${activeAdminSheet === sheet ? 'bg-brand-green text-white font-bold shadow-md' : 'hover:bg-slate-700/60 text-slate-300'}">
-            <span class="flex items-center gap-2 text-xs"><i data-lucide="file-text" class="w-4 h-4 text-brand-yellow"></i> ${sheet}</span>
+          <button 
+            onclick="handleAdminMenuClick('${sheet}')" 
+            class="w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center justify-between ${activeAdminSheet === sheet ? 'bg-brand-green text-white font-bold shadow-md' : 'hover:bg-slate-700/60 text-slate-300'}"
+          >
+            <span class="flex items-center gap-2 text-xs">
+              <i data-lucide="file-text" class="w-4 h-4 text-brand-yellow"></i> ${sheet}
+            </span>
             <span class="text-[10px] bg-slate-900/60 px-2 py-0.5 rounded-full text-slate-300 font-mono">${count}</span>
           </button>
         `;
       }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Fungsi Wrapper untuk menangani klik menu + menutup sidebar
+    function handleAdminMenuClick(sheet) {
+      // 1. Eksekusi perpindahan sheet admin
+      if (typeof switchAdminSheet === 'function') {
+        switchAdminSheet(sheet);
+      } else {
+        activeAdminSheet = sheet;
+        renderAdminSidebarMenu();
+        if (typeof renderAdminSheetView === 'function') renderAdminSheetView(sheet);
+      }
+
+      // 2. Tutup sidebar otomatis (Aman untuk berbagai kelas CSS / ID sidebar)
+      closeAdminSidebar();
+    }
+
+    // Fungsi Penutup Sidebar Admin
+    function closeAdminSidebar() {
+      // Daftar kemungkinan ID sidebar & overlay di layout Anda
+      const sidebar = document.getElementById('admin-sidebar') || document.getElementById('sidebar-menu') || document.getElementById('mobile-menu');
+      const overlay = document.getElementById('admin-sidebar-overlay') || document.getElementById('sidebar-overlay');
+
+      if (sidebar) {
+        sidebar.classList.add('hidden', '-translate-x-full');
+        sidebar.classList.remove('translate-x-0');
+      }
+
+      if (overlay) {
+        overlay.classList.add('hidden');
+      }
     }
 
     function renderAdminStats() {
@@ -1582,7 +1623,6 @@
         </div>
       `).join('');
     }
-
     
     function switchAdminSheet(sheetName) {
       activeAdminSheet = sheetName;
