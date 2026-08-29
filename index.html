@@ -470,13 +470,13 @@
 
       // Helper konversi ID Google Drive atau URL langsung
       const getImageUrl = (urlOrId) => {
-        if (!urlOrId) return 'https://lh3.googleusercontent.com/d/1Kj76z4Fxl4rtVD75-xsAQmyVWJgJOZ_M';
+        if (!urlOrId) return 'https://lh3.googleusercontent.com/d/';
         if (urlOrId.includes('http')) return urlOrId;
         return `https://lh3.googleusercontent.com/d/${urlOrId}`;
       };
 
       // Mengambil gambar dari sheet Pengaturan (Hero Image)
-      const heroImageRaw = globalData.Setting?.hero_image || globalData.Setting?.gambar_hero || globalData.Setting?.banner || '1Kj76z4Fxl4rtVD75-xsAQmyVWJgJOZ_M';
+      const heroImageRaw = globalData.Setting?.hero_image || globalData.Setting?.gambar_hero || globalData.Setting?.banner || '';
       const heroImageUrl = getImageUrl(heroImageRaw);
 
       container.innerHTML = `
@@ -533,7 +533,7 @@
                       src="${heroImageUrl}" 
                       alt="Ma'had Aly Hero Image" 
                       class="w-full h-full object-cover rounded-[50%] transition-transform duration-500 group-hover:scale-105"
-                      onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/d/1Kj76z4Fxl4rtVD75-xsAQmyVWJgJOZ_M';"
+                      onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/d/';"
                     />
                   </div>
                 </div>
