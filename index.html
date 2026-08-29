@@ -470,8 +470,7 @@
 
       // Helper konversi ID Google Drive atau URL langsung
       const getImageUrl = (urlOrId) => {
-        if (!urlOrId) return 'https://lh3.googleusercontent.com/d/1Kj76z4Fxl4rtVD75-xsAQmyVWJgJOZ_M';
-        if (urlOrId.includes('http')) return urlOrId;
+                if (urlOrId.includes('http')) return urlOrId;
         return `https://lh3.googleusercontent.com/d/${urlOrId}`;
       };
 
