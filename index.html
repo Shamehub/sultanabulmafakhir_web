@@ -1853,7 +1853,25 @@
       }
     }
 
-    
+    // Fungsi Helper: Mengubah Link Google Drive / Dropbox menjadi Direct Download Link
+    function getDirectDownloadUrl(url) {
+      if (!url || url === '#') return '#';
+      
+      // Konversi link Google Drive (view/preview/edit) ke direct download
+      if (url.includes('drive.google.com')) {
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+          return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+        }
+      }
+      
+      // Konversi link Dropbox
+      if (url.includes('dropbox.com')) {
+        return url.replace('dl=0', 'dl=1');
+      }
+
+      return url;
+    }
 
     // Fungsi Helper Formatting Tanggal
     function formatDate(dateString) {
