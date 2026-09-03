@@ -1229,10 +1229,10 @@ function renderPMBForm() {
           <h4 class="text-base font-extrabold text-slate-800">Unggah Berkas Persyaratan (JPG/PNG/PDF)</h4>
           <div class="grid md:grid-cols-2 gap-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
             <div class="space-y-1"><label class="text-slate-700">Pas Foto Profil*</label><input type="file" id="file-foto" accept="image/*" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"></div>
-            <div class="space-y-1"><label class="text-slate-700">KTP / Kartu Identitas*</label><input type="file" id="file-ktp" accept="image/*,application/pdf" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"></div>
-            <div class="space-y-1"><label class="text-slate-700">Kartu Keluarga (KK)*</label><input type="file" id="file-kk" accept="image/*,application/pdf" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"></div>
-            <div class="space-y-1"><label class="text-slate-700">Ijazah Terakhir*</label><input type="file" id="file-ijazah" accept="image/*,application/pdf" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"></div>
-            <div class="md:col-span-2 space-y-1"><label class="text-slate-700">Transkrip Nilai / SKHUN*</label><input type="file" id="file-skhun" accept="image/*,application/pdf" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"></div>
+            <div class="space-y-1"><label class="text-slate-700">KTP / Kartu Identitas*</label><input type="file" id="file-ktp" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"></div>
+            <div class="space-y-1"><label class="text-slate-700">Kartu Keluarga (KK)*</label><input type="file" id="file-kk" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"></div>
+            <div class="space-y-1"><label class="text-slate-700">Ijazah Terakhir*</label><input type="file" id="file-ijazah" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"></div>
+            <div class="md:col-span-2 space-y-1"><label class="text-slate-700">Transkrip Nilai / SKHUN*</label><input type="file" id="file-skhun" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"></div>
           </div>
         </div>
 
@@ -1246,28 +1246,11 @@ function renderPMBForm() {
   `;
 }
 
-// Fungsi konversi file ke Base64 (Mendukung Gambar & PDF)
-function processFileToBase64(file, maxWidth = 800, quality = 0.6) {
+function compressAndBase64(file, maxWidth = 800, quality = 0.6) {
   return new Promise((resolve) => {
-    if (!file) return resolve(null);
-
+    if (!file) return resolve("");
+    
     const reader = new FileReader();
-
-    // Jika file adalah PDF, baca langsung sebagai DataURL tanpa Canvas
-    if (file.type === "application/pdf") {
-      reader.onload = (e) => {
-        resolve({
-          base64: e.target.result.split(',')[1],
-          mimeType: file.type,
-          name: file.name
-        });
-      };
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(file);
-      return;
-    }
-
-    // Jika file adalah Gambar, lakukan kompresi via Canvas
     reader.readAsDataURL(file);
     reader.onload = (event) => {
       const img = new Image();
@@ -1287,24 +1270,19 @@ function processFileToBase64(file, maxWidth = 800, quality = 0.6) {
 
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve({
-          base64: dataUrl.split(',')[1],
-          mimeType: 'image/jpeg',
-          name: file.name.replace(/\.[^/.]+$/, "") + ".jpg"
-        });
+        
+        resolve(canvas.toDataURL('image/jpeg', quality));
       };
-      img.onerror = () => resolve(null);
+      img.onerror = () => resolve("");
     };
-    reader.onerror = () => resolve(null);
+    reader.onerror = () => resolve("");
   });
 }
 
 async function handlePMBSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('btn-submit-pmb');
-
+  
   const fotoFile = document.getElementById('file-foto')?.files[0];
   const ktpFile = document.getElementById('file-ktp')?.files[0];
   const kkFile = document.getElementById('file-kk')?.files[0];
@@ -1321,12 +1299,12 @@ async function handlePMBSubmit(e) {
   if (window.lucide) lucide.createIcons();
 
   try {
-    const [fotoObj, ktpObj, kkObj, ijazahObj, skhunObj] = await Promise.all([
-      processFileToBase64(fotoFile, 600, 0.7),
-      processFileToBase64(ktpFile, 800, 0.6),
-      processFileToBase64(kkFile, 800, 0.6),
-      processFileToBase64(ijazahFile, 800, 0.6),
-      processFileToBase64(skhunFile, 800, 0.6)
+    const [fotoBase64, ktpBase64, kkBase64, ijazahBase64, skhunBase64] = await Promise.all([
+      compressAndBase64(fotoFile, 600, 0.7),
+      compressAndBase64(ktpFile, 800, 0.6),
+      compressAndBase64(kkFile, 800, 0.6),
+      compressAndBase64(ijazahFile, 800, 0.6),
+      compressAndBase64(skhunFile, 800, 0.6)
     ]);
 
     btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline mr-2"></i> Mengirim Data...`;
@@ -1347,15 +1325,11 @@ async function handlePMBSubmit(e) {
       tahun_masuk_pesantren: document.getElementById('pmb-thn-masuk-p').value,
       tahun_keluar_pesantren: document.getElementById('pmb-thn-keluar-p').value,
       prodi_pilihan: document.getElementById('pmb-prodi').value,
-      
-      // Mengirim objek berkas
-      files: {
-        foto: fotoObj,
-        ktp: ktpObj,
-        kk: kkObj,
-        ijazah: ijazahObj,
-        skhun: skhunObj
-      }
+      foto_profil: fotoBase64,
+      ktp: ktpBase64,
+      kk: kkBase64,
+      ijazah: ijazahBase64,
+      skhun: skhunBase64
     };
 
     const payload = {
@@ -1371,9 +1345,7 @@ async function handlePMBSubmit(e) {
 
     if (json.status === "success") {
       const noReg = json.noReg || ("PMB-" + Date.now().toString().slice(-6));
-      // Tampilkan kartu registrasi menggunakan URL foto yang tersimpan di Drive atau preview local
-      const fotoPreviewUrl = fotoObj ? `data:${fotoObj.mimeType};base64,${fotoObj.base64}` : '';
-      renderSuccessAndRegistrationCard(noReg, formDataObj, fotoPreviewUrl);
+      renderSuccessAndRegistrationCard(noReg, formDataObj, fotoBase64);
     } else {
       alert("Gagal: " + json.message);
       btn.innerText = "Kirim Registrasi PMB & Dapatkan Kartu";
