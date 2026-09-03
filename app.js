@@ -1243,11 +1243,11 @@ async function handleAdminAuth(e) {
   if (window.lucide) lucide.createIcons();
 
   try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: "adminLogin", password: pass })
-        });
-        const json = await res.json();
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: "adminLogin", password: pass })
+    });
+    const json = await res.json();
         
         if (json.status === "success") {
           closeAdminModal();
