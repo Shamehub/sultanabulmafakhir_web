@@ -497,121 +497,36 @@ function renderProfilView() {
 }
 
 function renderInformasiView() {
-  const items = globalData.Informasi || [];
-
   document.getElementById('main-content').innerHTML = `
-    <div class="space-y-8 max-w-7xl mx-auto px-1 sm:px-0">
-      <!-- Hero Banner -->
-      <div class="relative bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 rounded-3xl p-6 md:p-10 text-white shadow-2xl overflow-hidden border border-emerald-700/30">
-        <div class="relative z-10 space-y-3 max-w-2xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold backdrop-blur-md">
-            <i data-lucide="megaphone" class="w-3.5 h-3.5"></i> Pusat Pengumuman
-          </div>
-          <h2 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
-            Pengumuman & <span class="text-amber-400">Informasi</span>
-          </h2>
-          <p class="text-xs md:text-sm text-emerald-100/80 leading-relaxed">
-            Dapatkan berita terkini, pengumuman akademik, serta edaran resmi lingkungan Ma'had Aly Sultan Abul Mafakhir.
-          </p>
-        </div>
-      </div>
-
-      <!-- Grid Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        ${items.length === 0 ? `
-          <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm text-slate-400">
-            <i data-lucide="bell-off" class="w-12 h-12 mx-auto mb-3 stroke-1 text-slate-300"></i>
-            <p class="text-sm">Belum ada informasi atau pengumuman saat ini.</p>
-          </div>
-        ` : items.map(inf => {
-          const formattedDate = inf.tanggal ? new Date(inf.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Terbaru';
-          
-          return `
-            <div onclick="navigate('/informasi/${slugify(inf.judul)}')" class="group bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between relative overflow-hidden cursor-pointer">
-              <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800 opacity-80 group-hover:opacity-100 transition-opacity"></div>
-              <div>
-                <div class="flex items-center justify-between mb-4">
-                  <span class="text-[10px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60">
-                    ${inf.kategori || 'Umum'}
-                  </span>
-                  <span class="text-xs font-medium text-slate-400 flex items-center gap-1">
-                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-600"></i> ${formattedDate}
-                  </span>
-                </div>
-                <h3 class="text-lg font-bold text-slate-800 group-hover:text-emerald-700 transition-colors leading-snug mb-3">${inf.judul}</h3>
-                <p class="text-xs md:text-sm text-slate-500 leading-relaxed line-clamp-3 mb-6">${inf.isi}</p>
-              </div>
-              <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-[11px] font-medium text-slate-400 flex items-center gap-1">
-                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500"></i> Terverifikasi
-                </span>
-                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 group-hover:text-emerald-900 group-hover:translate-x-0.5 transition-all">
-                  <span>Lihat Detail</span>
-                  <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                </span>
-              </div>
+    <div class="space-y-8 max-w-7xl mx-auto">
+      <h2 class="text-2xl font-bold border-b-2 border-brand-yellow pb-2 text-brand-green">Pengumuman & Informasi</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        ${(globalData.Informasi || []).map(inf => `
+          <div onclick="navigate('/informasi/${slugify(inf.judul)}')" class="bg-white rounded-xl shadow-md p-6 border border-slate-100 border-l-4 border-l-brand-yellow space-y-3 cursor-pointer hover:shadow-lg transition hover:-translate-y-1">
+            <div class="flex justify-between items-center text-xs">
+              <span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-bold">${inf.kategori || 'Umum'}</span>
+              <span class="text-slate-400">${inf.tanggal ? new Date(inf.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : ''}</span>
             </div>
-          `;
-        }).join('')}
+            <h3 class="text-lg font-bold text-slate-800">${inf.judul}</h3>
+            <p class="text-sm text-slate-600 line-clamp-3">${inf.isi}</p>
+          </div>
+        `).join('')}
       </div>
     </div>
   `;
 }
 
 function renderProdiView() {
-  const items = globalData.Prodi || [];
-
   document.getElementById('main-content').innerHTML = `
-    <div class="space-y-8 max-w-7xl mx-auto px-1 sm:px-0">
-      <!-- Hero Banner -->
-      <div class="relative bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 rounded-3xl p-6 md:p-10 text-white shadow-2xl overflow-hidden border border-emerald-700/30">
-        <div class="relative z-10 space-y-3 max-w-2xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold backdrop-blur-md">
-            <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> Pendidikan Tinggi Keagamaan
-          </div>
-          <h2 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
-            Program <span class="text-amber-400">Studi</span>
-          </h2>
-          <p class="text-xs md:text-sm text-emerald-100/80 leading-relaxed">
-            Pilihan konsentrasi keilmuan Islam bertaraf keahlian tinggi (Tafaqquh Fiddin) yang dirancang untuk mencetak mutafaqqih fi ad-din.
-          </p>
-        </div>
-      </div>
-
-      <!-- Grid Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        ${items.length === 0 ? `
-          <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm text-slate-400">
-            <i data-lucide="book-open" class="w-12 h-12 mx-auto mb-3 stroke-1 text-slate-300"></i>
-            <p class="text-sm">Belum ada program studi yang ditampilkan.</p>
-          </div>
-        ` : items.map(p => `
-          <div onclick="navigate('/prodi/${slugify(p.nama_prodi)}')" class="group bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between relative overflow-hidden cursor-pointer">
-            <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800 opacity-80 group-hover:opacity-100 transition-opacity"></div>
-            <div>
-              <div class="flex items-center justify-between mb-5">
-                <span class="text-[10px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
-                  <i data-lucide="award" class="w-3 h-3 text-emerald-600"></i> Akreditasi: ${p.akreditasi || 'Baik'}
-                </span>
-                <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-all duration-300 shadow-sm">
-                  <i data-lucide="book-marked" class="w-5 h-5"></i>
-                </div>
-              </div>
-              <h3 class="text-xl font-extrabold text-slate-800 group-hover:text-emerald-700 transition-colors leading-snug mb-2">${p.nama_prodi}</h3>
-              <div class="inline-block text-xs font-semibold text-emerald-800 bg-emerald-50/80 px-2.5 py-1 rounded-lg mb-4">
-                Gelar: ${p.gelar || '-'}
-              </div>
-              <p class="text-xs md:text-sm text-slate-500 leading-relaxed line-clamp-3 mb-6">${p.deskripsi}</p>
-            </div>
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-[11px] font-medium text-slate-400 flex items-center gap-1">
-                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500"></i> Kurikulum Resmi
-              </span>
-              <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 group-hover:text-emerald-900 group-hover:translate-x-0.5 transition-all">
-                <span>Detail Program</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-              </span>
-            </div>
+    <div class="space-y-8 max-w-7xl mx-auto">
+      <h2 class="text-2xl font-bold border-b-2 border-brand-yellow pb-2 text-brand-green">Program Studi Akademik</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        ${(globalData.Prodi || []).map(p => `
+          <div onclick="navigate('/prodi/${slugify(p.nama_prodi)}')" class="bg-white rounded-2xl shadow-lg p-8 border border-slate-100 relative overflow-hidden cursor-pointer hover:border-brand-green transition hover:-translate-y-1">
+            <div class="absolute top-0 right-0 bg-brand-yellow text-slate-900 text-xs font-bold px-4 py-1 rounded-bl-xl">Akreditasi: ${p.akreditasi || 'Baik'}</div>
+            <h3 class="text-xl font-extrabold text-brand-green mb-1">${p.nama_prodi}</h3>
+            <span class="text-xs font-semibold text-slate-500 mb-4 block">Gelar Kelulusan: ${p.gelar}</span>
+            <p class="text-sm text-slate-600 leading-relaxed line-clamp-3">${p.deskripsi}</p>
           </div>
         `).join('')}
       </div>
@@ -620,62 +535,22 @@ function renderProdiView() {
 }
 
 function renderBeritaView() {
-  const items = globalData.Berita || [];
-
   document.getElementById('main-content').innerHTML = `
-    <div class="space-y-8 max-w-7xl mx-auto px-1 sm:px-0">
-      <!-- Hero Banner -->
-      <div class="relative bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 rounded-3xl p-6 md:p-10 text-white shadow-2xl overflow-hidden border border-emerald-700/30">
-        <div class="relative z-10 space-y-3 max-w-2xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold backdrop-blur-md">
-            <i data-lucide="newspaper" class="w-3.5 h-3.5"></i> Kabar & Artikel
-          </div>
-          <h2 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
-            Berita <span class="text-amber-400">Terbaru</span>
-          </h2>
-          <p class="text-xs md:text-sm text-emerald-100/80 leading-relaxed">
-            Ikuti wawasan keislaman, liputan kegiatan santri, dan berita perkembangan Ma'had Aly Sultan Abul Mafakhir.
-          </p>
-        </div>
-      </div>
-
-      <!-- Grid Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        ${items.length === 0 ? `
-          <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm text-slate-400">
-            <i data-lucide="file-text" class="w-12 h-12 mx-auto mb-3 stroke-1 text-slate-300"></i>
-            <p class="text-sm">Belum ada berita yang diterbitkan saat ini.</p>
-          </div>
-        ` : items.map(b => {
-          const formattedDate = b.tanggal ? new Date(b.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : '';
-          
-          return `
-            <div onclick="navigate('/berita/${slugify(b.judul)}')" class="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between cursor-pointer">
+    <div class="space-y-8 max-w-7xl mx-auto">
+      <h2 class="text-2xl font-bold border-b-2 border-brand-yellow pb-2 text-brand-green">Berita & Artikel</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        ${(globalData.Berita || []).map(b => `
+          <div onclick="navigate('/berita/${slugify(b.judul)}')" class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-100 flex flex-col cursor-pointer hover:shadow-lg transition hover:-translate-y-1">
+            <img src="${b.gambar || 'https://via.placeholder.com/600x400'}" class="h-48 w-full object-cover" alt="${b.judul}">
+            <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
               <div>
-                <div class="relative h-48 overflow-hidden bg-slate-100">
-                  <img src="${b.gambar || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=600&auto=format&fit=crop'}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${b.judul}">
-                  <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
-                  <span class="absolute bottom-3 left-3 text-[10px] font-semibold text-white/90 bg-slate-900/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
-                    ${b.penulis || 'Admin'}
-                  </span>
-                </div>
-                <div class="p-6">
-                  <div class="text-[11px] font-medium text-slate-400 mb-2 flex items-center gap-1">
-                    <i data-lucide="calendar" class="w-3 h-3 text-emerald-600"></i> ${formattedDate}
-                  </div>
-                  <h3 class="font-bold text-slate-800 text-base leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 mb-2">${b.judul}</h3>
-                  <p class="text-xs text-slate-500 leading-relaxed line-clamp-3">${b.konten}</p>
-                </div>
-              </div>
-              <div class="p-6 pt-0 border-t border-slate-100/50 mt-4 flex items-center justify-between">
-                <span class="text-xs font-semibold text-emerald-700 group-hover:text-emerald-900 flex items-center gap-1">
-                  <span>Baca Artikel</span>
-                  <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i>
-                </span>
+                <div class="text-[11px] text-slate-400 mb-1">${b.tanggal ? new Date(b.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) : ''} • Oleh ${b.penulis || 'Admin'}</div>
+                <h3 class="font-bold text-slate-800 text-base leading-snug line-clamp-2">${b.judul}</h3>
+                <p class="text-xs text-slate-600 mt-2 line-clamp-3">${b.konten}</p>
               </div>
             </div>
-          `;
-        }).join('')}
+          </div>
+        `).join('')}
       </div>
     </div>
   `;
@@ -685,57 +560,41 @@ function renderGaleriView() {
   const items = globalData.Galeri || [];
   
   document.getElementById('main-content').innerHTML = `
-    <div class="space-y-8 max-w-7xl mx-auto px-1 sm:px-0">
-      <!-- Hero Banner -->
-      <div class="relative bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 rounded-3xl p-6 md:p-10 text-white shadow-2xl overflow-hidden border border-emerald-700/30">
-        <div class="relative z-10 space-y-3 max-w-2xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold backdrop-blur-md">
-            <i data-lucide="camera" class="w-3.5 h-3.5"></i> Dokumentasi Visual
-          </div>
-          <h2 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
-            Galeri <span class="text-amber-400">Kegiatan</span>
-          </h2>
-          <p class="text-xs md:text-sm text-emerald-100/80 leading-relaxed">
-            Arsip foto dan momen kegiatan belajar-mengajar, fasilitas kampus, serta acara rutin di Ma'had Aly.
-          </p>
-        </div>
+    <div class="space-y-8 max-w-7xl mx-auto">
+      <div class="border-b-2 border-brand-yellow pb-3">
+        <h2 class="text-2xl font-bold text-brand-green flex items-center gap-2">
+          <i data-lucide="image" class="w-7 h-7 text-brand-green"></i> Galeri Dokumentasi
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">Dokumentasi kegiatan dan fasilitas Ma'had Aly.</p>
       </div>
 
-      <!-- Grid Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        ${items.length === 0 ? `
-          <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm text-slate-400">
-            <i data-lucide="image-off" class="w-12 h-12 mx-auto mb-3 stroke-1 text-slate-300"></i>
-            <p class="text-sm">Belum ada dokumentasi foto yang diunggah.</p>
-          </div>
-        ` : items.map((g, idx) => {
+        ${items.map((g, idx) => {
           const imgUrl = g.url || g.gambar || g.url_gambar || g.foto || g.link_gambar || '';
           const fallbackUrl = 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?q=80&w=600&auto=format&fit=crop';
           const kategori = g.kategori || g.tag || 'Kegiatan';
 
           return `
-            <div onclick="openGalleryLightbox(${idx})" class="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between cursor-pointer">
-              <div class="relative overflow-hidden h-56 bg-slate-100">
-                <span class="absolute top-3 left-3 z-10 bg-emerald-950/80 backdrop-blur-md text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-700/50 shadow-md">
+            <div onclick="openGalleryLightbox(${idx})" class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition duration-300 hover:-translate-y-1 cursor-pointer group flex flex-col justify-between">
+              <div class="relative overflow-hidden h-52 bg-slate-100">
+                <span class="absolute top-3 left-3 z-10 bg-amber-500/90 backdrop-blur text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md">
                   ${kategori}
                 </span>
-                <img src="${imgUrl || fallbackUrl}" onerror="this.onerror=null; this.src='${fallbackUrl}';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${g.judul || g.keterangan || 'Galeri'}">
-                <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <span class="bg-amber-400 text-slate-900 p-3 rounded-2xl shadow-xl transform scale-75 group-hover:scale-100 transition-transform duration-300">
+                <img src="${imgUrl || fallbackUrl}" onerror="this.onerror=null; this.src='${fallbackUrl}';" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="${g.judul || g.keterangan || 'Galeri'}">
+                <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                  <span class="bg-white/90 backdrop-blur text-slate-800 p-2.5 rounded-full shadow-lg">
                     <i data-lucide="zoom-in" class="w-5 h-5"></i>
                   </span>
                 </div>
               </div>
-              <div class="p-4 bg-white">
-                <p class="font-bold text-slate-800 text-sm truncate group-hover:text-emerald-700 transition-colors">${g.judul || g.keterangan || 'Kegiatan Ma\'had'}</p>
+              <div class="p-4">
+                <p class="font-bold text-slate-800 text-sm truncate">${g.judul || g.keterangan || 'Kegiatan Ma\'had'}</p>
               </div>
             </div>
           `;
         }).join('')}
       </div>
     </div>
-  `;
-}
 
     <!-- MODAL LIGHTBOX FOTO -->
     <div id="gallery-lightbox" class="fixed inset-0 z-50 bg-black/95 hidden backdrop-blur-md flex flex-col justify-between p-4 md:p-6 select-none">
