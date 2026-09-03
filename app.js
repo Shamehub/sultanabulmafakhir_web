@@ -685,35 +685,49 @@ function renderGaleriView() {
   const items = globalData.Galeri || [];
   
   document.getElementById('main-content').innerHTML = `
-    <div class="space-y-8 max-w-7xl mx-auto">
-      <div class="border-b-2 border-brand-yellow pb-3">
-        <h2 class="text-2xl font-bold text-brand-green flex items-center gap-2">
-          <i data-lucide="image" class="w-7 h-7 text-brand-green"></i> Galeri Dokumentasi
-        </h2>
-        <p class="text-xs text-slate-500 mt-1">Dokumentasi kegiatan dan fasilitas Ma'had Aly.</p>
+    <div class="space-y-8 max-w-7xl mx-auto px-1 sm:px-0">
+      <!-- Hero Banner Premium -->
+      <div class="relative bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 rounded-3xl p-6 md:p-10 text-white shadow-2xl overflow-hidden border border-emerald-700/30">
+        <div class="relative z-10 space-y-3 max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold backdrop-blur-md">
+            <i data-lucide="camera" class="w-3.5 h-3.5"></i> Dokumentasi Visual
+          </div>
+          <h2 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
+            Galeri <span class="text-amber-400">Kegiatan</span>
+          </h2>
+          <p class="text-xs md:text-sm text-emerald-100/80 leading-relaxed">
+            Arsip foto dan momen kegiatan belajar-mengajar, fasilitas kampus, serta acara rutin di Ma'had Aly Sultan Abul Mafakhir.
+          </p>
+        </div>
       </div>
 
+      <!-- Grid Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        ${items.map((g, idx) => {
+        ${items.length === 0 ? `
+          <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm text-slate-400">
+            <i data-lucide="image-off" class="w-12 h-12 mx-auto mb-3 stroke-1 text-slate-300"></i>
+            <p class="text-sm">Belum ada dokumentasi foto yang diunggah saat ini.</p>
+          </div>
+        ` : items.map((g, idx) => {
           const imgUrl = g.url || g.gambar || g.url_gambar || g.foto || g.link_gambar || '';
           const fallbackUrl = 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?q=80&w=600&auto=format&fit=crop';
           const kategori = g.kategori || g.tag || 'Kegiatan';
 
           return `
-            <div onclick="openGalleryLightbox(${idx})" class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition duration-300 hover:-translate-y-1 cursor-pointer group flex flex-col justify-between">
-              <div class="relative overflow-hidden h-52 bg-slate-100">
-                <span class="absolute top-3 left-3 z-10 bg-amber-500/90 backdrop-blur text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md">
+            <div onclick="openGalleryLightbox(${idx})" class="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between cursor-pointer relative">
+              <div class="relative overflow-hidden h-56 bg-slate-100">
+                <span class="absolute top-3 left-3 z-10 bg-emerald-950/80 backdrop-blur-md text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-700/50 shadow-md">
                   ${kategori}
                 </span>
-                <img src="${imgUrl || fallbackUrl}" onerror="this.onerror=null; this.src='${fallbackUrl}';" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="${g.judul || g.keterangan || 'Galeri'}">
-                <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
-                  <span class="bg-white/90 backdrop-blur text-slate-800 p-2.5 rounded-full shadow-lg">
+                <img src="${imgUrl || fallbackUrl}" onerror="this.onerror=null; this.src='${fallbackUrl}';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${g.judul || g.keterangan || 'Galeri'}">
+                <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <span class="bg-amber-400 text-slate-900 p-3 rounded-2xl shadow-xl transform scale-75 group-hover:scale-100 transition-transform duration-300">
                     <i data-lucide="zoom-in" class="w-5 h-5"></i>
                   </span>
                 </div>
               </div>
-              <div class="p-4">
-                <p class="font-bold text-slate-800 text-sm truncate">${g.judul || g.keterangan || 'Kegiatan Ma\'had'}</p>
+              <div class="p-4 bg-white">
+                <p class="font-bold text-slate-800 text-sm truncate group-hover:text-emerald-700 transition-colors">${g.judul || g.keterangan || 'Kegiatan Ma\'had'}</p>
               </div>
             </div>
           `;
@@ -728,19 +742,19 @@ function renderGaleriView() {
           <span id="lightbox-category" class="bg-amber-500 text-slate-900 text-[11px] font-bold px-3 py-1 rounded-full shrink-0"></span>
           <p id="lightbox-title" class="text-sm md:text-base font-semibold truncate"></p>
         </div>
-        <button onclick="closeGalleryLightbox()" class="bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition shrink-0">
+        <button onclick="closeGalleryLightbox()" class="bg-white/10 hover:bg-white/20 p-2 rounded-full text-white transition shrink-0 cursor-pointer">
           <i data-lucide="x" class="w-6 h-6"></i>
         </button>
       </div>
 
       <div class="relative flex-1 flex items-center justify-center my-4 overflow-hidden">
-        <button onclick="changeGalleryImage(-1)" class="absolute left-2 md:left-6 z-10 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur border border-white/10 transition">
+        <button onclick="changeGalleryImage(-1)" class="absolute left-2 md:left-6 z-10 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur border border-white/10 transition cursor-pointer">
           <i data-lucide="chevron-left" class="w-6 h-6"></i>
         </button>
 
         <img id="lightbox-img" class="max-h-full max-w-full object-contain rounded-lg shadow-2xl transition-transform duration-300 cursor-zoom-in" onclick="toggleZoomImage(this)" alt="Full View">
 
-        <button onclick="changeGalleryImage(1)" class="absolute right-2 md:left-auto md:right-6 z-10 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur border border-white/10 transition">
+        <button onclick="changeGalleryImage(1)" class="absolute right-2 md:left-auto md:right-6 z-10 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur border border-white/10 transition cursor-pointer">
           <i data-lucide="chevron-right" class="w-6 h-6"></i>
         </button>
       </div>
