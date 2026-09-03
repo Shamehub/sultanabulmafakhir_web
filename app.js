@@ -225,39 +225,39 @@ function renderBerandaView() {
       </div>
 
       <!-- TENTANG INSTITUSI -->
-    <div onclick="navigate('/profil')" class="group relative bg-amber-100/40 hover:bg-amber-100/70 rounded-3xl p-6 md:p-8 border border-amber-200/80 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
-      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800"></div>
-      <div class="flex justify-between items-center border-b border-amber-200/60 pb-4 mb-4">
-        <h3 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2.5 group-hover:text-emerald-900 transition-colors">
-          <div class="w-9 h-9 rounded-xl bg-amber-200/60 text-emerald-900 flex items-center justify-center border border-amber-300/60 group-hover:bg-emerald-700 group-hover:text-white transition-all">
-            <i data-lucide="building-2" class="w-5 h-5"></i>
-          </div>
-          Tentang Ma'had Aly
-        </h3>
-        <div class="text-xs text-emerald-800 group-hover:text-emerald-950 font-bold flex items-center gap-1">
-          <span>Selengkapnya</span>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
-        </div>
-      </div>
-      <p class="text-slate-700 text-xs md:text-sm leading-relaxed whitespace-pre-line line-clamp-3">
-        ${globalData.Setting?.sejarah_singkat || globalData.Setting?.tagline || "Ma'had Aly Sultan Abul Mafakhir merupakan perguruan tinggi keagamaan Islam berbasis pesantren yang berfokus pada pendalaman ilmu-ilmu keislaman (Tafaqquh Fiddin)."}
-      </p>
-    </div>
-
-    <!-- PROGRAM STUDI -->
-    <div class="space-y-5">
-      <div class="flex justify-between items-end">
-        <div>
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Pilihan Program</span>
-          <h3 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <i data-lucide="book-open" class="w-6 h-6 text-emerald-700"></i> Program Studi Pilihan
+      <div onclick="navigate('/profil')" class="group relative bg-amber-100/40 hover:bg-amber-100/70 rounded-3xl p-6 md:p-8 border border-amber-200/80 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800"></div>
+        <div class="flex justify-between items-center border-b border-amber-200/60 pb-4 mb-4">
+          <h3 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2.5 group-hover:text-emerald-900 transition-colors">
+            <div class="w-9 h-9 rounded-xl bg-amber-200/60 text-emerald-900 flex items-center justify-center border border-amber-300/60 group-hover:bg-emerald-700 group-hover:text-white transition-all">
+              <i data-lucide="building-2" class="w-5 h-5"></i>
+            </div>
+            Tentang Ma'had Aly
           </h3>
+          <div class="text-xs text-emerald-800 group-hover:text-emerald-950 font-bold flex items-center gap-1">
+            <span>Selengkapnya</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+          </div>
         </div>
-        <button onclick="navigate('/prodi')" class="text-xs text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 group cursor-pointer">
-          <span>Lihat Semua</span>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
-        </button>
+        <p class="text-slate-700 text-xs md:text-sm leading-relaxed whitespace-pre-line line-clamp-3">
+          ${globalData.Setting?.sejarah_singkat || globalData.Setting?.tagline || "Ma'had Aly Sultan Abul Mafakhir merupakan perguruan tinggi keagamaan Islam berbasis pesantren yang berfokus pada pendalaman ilmu-ilmu keislaman (Tafaqquh Fiddin)."}
+        </p>
       </div>
+
+      <!-- PROGRAM STUDI -->
+      <div class="space-y-5">
+        <div class="flex justify-between items-end">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Pilihan Program</span>
+            <h3 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="book-open" class="w-6 h-6 text-emerald-700"></i> Program Studi Pilihan
+            </h3>
+          </div>
+          <button onclick="navigate('/prodi')" class="text-xs text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 group cursor-pointer">
+            <span>Lihat Semua</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+          </button>
+        </div>
 
         <div class="grid md:grid-cols-3 gap-6">
           ${(globalData.Prodi || []).slice(0, 3).map(p => `
