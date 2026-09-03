@@ -1222,32 +1222,32 @@ async function downloadCardPDF() {
 }
 
 /* ==========================================
-ADMIN CMS LOGIC & TABEL SPREADSHEET (UPGRADED)
-========================================== */
+    ADMIN CMS LOGIC & TABEL SPREADSHEET (UPGRADED)
+    ========================================== */
 
-function openAdminModal() {
-  document.getElementById('admin-modal').classList.remove('hidden');
-}
+    function openAdminModal() {
+      document.getElementById('admin-modal').classList.remove('hidden');
+    }
 
-function closeAdminModal() {
-  document.getElementById('admin-modal').classList.add('hidden');
-}
+    function closeAdminModal() {
+      document.getElementById('admin-modal').classList.add('hidden');
+    }
 
-async function handleAdminAuth(e) {
-  e.preventDefault();
-  const btn = document.getElementById('btn-login-admin');
-  const pass = document.getElementById('admin-pass-input').value;
+    async function handleAdminAuth(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-login-admin');
+      const pass = document.getElementById('admin-pass-input').value;
       
-  btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-1"></i> Memverifikasi...`;
-  btn.disabled = true;
-  if (window.lucide) lucide.createIcons();
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-1"></i> Memverifikasi...`;
+      btn.disabled = true;
+      if (window.lucide) lucide.createIcons();
 
-  try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: "adminLogin", password: pass })
-    });
-    const json = await res.json();
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: "adminLogin", password: pass })
+        });
+        const json = await res.json();
         
         if (json.status === "success") {
           closeAdminModal();
