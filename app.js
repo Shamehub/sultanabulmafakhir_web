@@ -1774,11 +1774,47 @@ function buildCrudForm(dataObj) {
 
   container.innerHTML = keys.map(k => {
     const val = dataObj[k] !== undefined ? dataObj[k] : '';
-    const isLongText = k.includes('isi') || k.includes('konten') || k.includes('deskripsi') || k.includes('alamat');
+    const keyLower = k.toLowerCase();
+    
+    // Deteksi jenis field
+    const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
+    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo');
+    const isDateField = keyLower.includes('tanggal') || keyLower.includes('date');
     const isReadOnly = (k === 'id' && currentEditingRowId);
 
-    // Tata letak 2 kolom: Textarea/deskripsi mengambil full width (2 kolom)
-    const colSpanClass = isLongText ? 'md:col-span-2' : 'md:col-span-1';
+    const colSpanClass = (isLongText || isImageField) ? 'md:col-span-2' : 'md:col-span-1';
+
+    let inputHtml = '';
+
+    if (isImageField) {
+      // Input bertipe File Upload + Preview Gambar + Input Tersembunyi Penyimpan URL/Base64
+      inputHtml = `
+        <div class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
+          <input type="hidden" name="${k}" id="input_val_${k}" value="${val}">
+          
+          <div class="flex items-center gap-3">
+            <input type="file" accept="image/*" id="file_picker_${k}" onchange="handleFileSelect(event, '${k}')" 
+              class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"/>
+          </div>
+
+          <!-- Live Preview Gambar -->
+          <div id="preview_container_${k}" class="${val ? '' : 'hidden'} mt-2 relative w-32 h-32 rounded-lg overflow-hidden border border-slate-300">
+            <img id="preview_img_${k}" src="${val}" class="w-full h-full object-cover">
+          </div>
+        </div>
+      `;
+    } else if (isLongText) {
+      inputHtml = `<textarea name="${k}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200 h-32 leading-relaxed resize-y">${val}</textarea>`;
+    } else if (isDateField) {
+      // Menangani format Tanggal agar tampil presisi sebagai Input Date
+      let formattedDate = val;
+      if (val && val.includes('T')) {
+        formattedDate = val.split('T')[0];
+      }
+      inputHtml = `<input type="date" name="${k}" value="${formattedDate}" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200">`;
+    } else {
+      inputHtml = `<input type="text" name="${k}" value="${val}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3.5 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200"'}>`;
+    }
 
     return `
       <div class="space-y-1.5 ${colSpanClass}">
@@ -1786,15 +1822,35 @@ function buildCrudForm(dataObj) {
           <span>${k.replace(/_/g, ' ')}</span>
           ${isReadOnly ? '<span class="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-mono">LOCKED</span>' : ''}
         </label>
-        ${isLongText ? 
-          `<textarea name="${k}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200 h-32 leading-relaxed resize-y">${val}</textarea>` : 
-          `<input type="text" name="${k}" value="${val}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3.5 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200"'}>`
-        }
+        ${inputHtml}
       </div>
     `;
   }).join('');
 
   if (window.lucide) lucide.createIcons();
+}
+
+// Helper untuk membaca file lokal dan membuat Live Preview (Base64 conversion)
+function handleFileSelect(event, fieldKey) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64Data = e.target.result;
+    
+    // Set nilai string Base64 ke input hidden
+    document.getElementById(`input_val_${fieldKey}`).value = base64Data;
+    
+    // Tampilkan Live Preview Gambar
+    const imgEl = document.getElementById(`preview_img_${fieldKey}`);
+    const containerEl = document.getElementById(`preview_container_${fieldKey}`);
+    if (imgEl && containerEl) {
+      imgEl.src = base64Data;
+      containerEl.classList.remove('hidden');
+    }
+  };
+  reader.readAsDataURL(file);
 }
 
 async function handleCrudSubmit(e) {
@@ -1828,7 +1884,7 @@ async function handleCrudSubmit(e) {
       Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
-        text: 'Data telah tersimpan ke Google Spreadsheet.',
+        text: 'Data dan file gambar telah tersimpan.',
         confirmButtonColor: '#047857',
         customClass: { popup: 'rounded-3xl' }
       });
