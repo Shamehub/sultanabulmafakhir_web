@@ -427,6 +427,25 @@ function renderBerandaView() {
 
 function renderProfilView() {
   const items = globalData.Profil || [];
+
+  // Filter items: pisahkan Sejarah, Visi, dan Misi untuk digabung ke dalam 1 Card Premium
+  const mainKeys = ['sejarah', 'visi', 'misi'];
+  const mainItems = items.filter(p => {
+    const text = ((p.judul || '') + ' ' + (p.tipe || '')).toLowerCase();
+    return mainKeys.some(key => text.includes(key));
+  });
+
+  // Urutkan agar urutannya: Sejarah -> Visi -> Misi
+  mainItems.sort((a, b) => {
+    const textA = ((a.judul || '') + ' ' + (a.tipe || '')).toLowerCase();
+    const textB = ((b.judul || '') + ' ' + (b.tipe || '')).toLowerCase();
+    const getOrder = (t) => t.includes('sejarah') ? 1 : t.includes('visi') ? 2 : 3;
+    return getOrder(textA) - getOrder(textB);
+  });
+
+  // Item profil lainnya (Struktur, Sambutan, dll)
+  const otherItems = items.filter(p => !mainItems.includes(p));
+
   const getProfileIcon = (title = '', type = '') => {
     const text = (title + ' ' + type).toLowerCase();
     if (text.includes('sejarah')) return 'history';
@@ -439,6 +458,8 @@ function renderProfilView() {
 
   document.getElementById('main-content').innerHTML = `
     <div class="space-y-8 max-w-7xl mx-auto px-1 sm:px-0">
+      
+      <!-- HERO BANNER -->
       <div class="relative bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 rounded-3xl p-6 md:p-10 text-white shadow-2xl overflow-hidden border border-emerald-700/30">
         <div class="relative z-10 space-y-3 max-w-2xl">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold backdrop-blur-md">
@@ -453,47 +474,119 @@ function renderProfilView() {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        ${items.length === 0 ? `
-          <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm text-slate-400">
-            <i data-lucide="book-open" class="w-12 h-12 mx-auto mb-3 stroke-1 text-slate-300"></i>
-            <p class="text-sm">Belum ada informasi profil yang tersedia saat ini.</p>
-          </div>
-        ` : items.map(p => {
-          const title = p.judul || 'Profil Lembaga';
-          const type = p.tipe || 'INFORMASI';
-          const content = p.isi || '';
-          const iconName = getProfileIcon(title, type);
-          const slug = slugify(title);
+      ${items.length === 0 ? `
+        <div class="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm text-slate-400">
+          <i data-lucide="book-open" class="w-12 h-12 mx-auto mb-3 stroke-1 text-slate-300"></i>
+          <p class="text-sm">Belum ada informasi profil yang tersedia saat ini.</p>
+        </div>
+      ` : `
+        
+        <!-- MAIN PREMIUM CARD: SEJARAH, VISI & MISI -->
+        ${mainItems.length > 0 ? `
+          <div class="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden relative">
+            <!-- Top Gradient Border Line -->
+            <div class="h-2 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800"></div>
 
-          return `
-            <div class="group bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
-              <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800 opacity-80 group-hover:opacity-100 transition-opacity"></div>
-              <div>
-                <div class="flex items-center justify-between mb-5">
-                  <span class="text-[10px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60">${type}</span>
-                  <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-sm">
-                    <i data-lucide="${iconName}" class="w-5 h-5"></i>
+            <div class="p-6 md:p-10 divide-y divide-slate-100 space-y-8 md:space-y-10">
+              ${mainItems.map((item, idx) => {
+                const title = item.judul || 'Informasi';
+                const type = item.tipe || 'PROFIL';
+                const content = item.isi || '';
+                const iconName = getProfileIcon(title, type);
+                const slug = slugify(title);
+
+                return `
+                  <div class="${idx !== 0 ? 'pt-8 md:pt-10' : ''} space-y-4">
+                    <!-- Section Header -->
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center shadow-sm shrink-0">
+                          <i data-lucide="${iconName}" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                          <span class="text-[10px] font-extrabold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60 inline-block mb-1">
+                            ${type}
+                          </span>
+                          <h3 class="text-xl md:text-2xl font-bold text-slate-800">${title}</h3>
+                        </div>
+                      </div>
+
+                      <button onclick="navigate('/profil/${slug}')" class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 transition-colors cursor-pointer bg-emerald-50 hover:bg-emerald-100/70 px-3.5 py-2 rounded-xl">
+                        <span>Detail Lengkap</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+
+                    <!-- Section Content -->
+                    <div class="text-xs md:text-sm text-slate-600 leading-relaxed whitespace-pre-line pl-0 md:pl-13">
+                      ${content}
+                    </div>
                   </div>
-                </div>
-                <h3 class="text-lg font-bold text-slate-800 group-hover:text-emerald-700 transition-colors leading-snug mb-3">${title}</h3>
-                <div class="text-xs md:text-sm text-slate-500 leading-relaxed line-clamp-4 whitespace-pre-line mb-6">${content}</div>
-              </div>
-              <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-[11px] font-medium text-slate-400 flex items-center gap-1">
-                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500"></i> Resmi
-                </span>
-                <button onclick="navigate('/profil/${slug}')" class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 group-hover:translate-x-0.5 transition-all cursor-pointer">
-                  <span>Baca Selengkapnya</span>
-                  <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
+                `;
+              }).join('')}
             </div>
-          `;
-        }).join('')}
-      </div>
+
+            <!-- Card Footer -->
+            <div class="bg-slate-50/80 px-6 md:px-10 py-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+              <span class="flex items-center gap-1.5 font-medium">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i> Informasi Dokumen Resmi Lembaga
+              </span>
+              <span class="font-mono text-[11px]">Ma'had Aly Sultan Abul Mafakhir</span>
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- OTHER PROFILE ITEMS GRID (Struktur Organisasi, Sambutan, dll) -->
+        ${otherItems.length > 0 ? `
+          <div class="pt-4 space-y-4">
+            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="layers" class="w-5 h-5 text-emerald-700"></i> Informasi Profil Lainnya
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              ${otherItems.map(p => {
+                const title = p.judul || 'Profil Lembaga';
+                const type = p.tipe || 'INFORMASI';
+                const content = p.isi || '';
+                const iconName = getProfileIcon(title, type);
+                const slug = slugify(title);
+
+                return `
+                  <div class="group bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800 opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                    <div>
+                      <div class="flex items-center justify-between mb-5">
+                        <span class="text-[10px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60">${type}</span>
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                          <i data-lucide="${iconName}" class="w-5 h-5"></i>
+                        </div>
+                      </div>
+                      <h3 class="text-lg font-bold text-slate-800 group-hover:text-emerald-700 transition-colors leading-snug mb-3">${title}</h3>
+                      <div class="text-xs md:text-sm text-slate-500 leading-relaxed line-clamp-4 whitespace-pre-line mb-6">${content}</div>
+                    </div>
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <span class="text-[11px] font-medium text-slate-400 flex items-center gap-1">
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500"></i> Resmi
+                      </span>
+                      <button onclick="navigate('/profil/${slug}')" class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-900 group-hover:translate-x-0.5 transition-all cursor-pointer">
+                        <span>Baca Selengkapnya</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+      `}
     </div>
   `;
+
+  // Render ulang ikon Lucide jika tersedia
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  }
 }
 
 function renderInformasiView() {
