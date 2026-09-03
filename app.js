@@ -1204,7 +1204,26 @@ async function downloadCardPDF() {
   if (!cardElem) return;
 
   try {
-    const canvas = await html2canvas(cardElem, { scale: 2 });
+    // 1. Pastikan semua gambar/QR eksternal di dalam elemen terisi & selesai dimuat
+    const images = cardElem.querySelectorAll('img');
+    await Promise.all(
+      Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve; // Tetap jalankan jika error agar tidak menggantung
+        });
+      })
+    );
+
+    // 2. Render ke canvas dengan penanganan CORS & Skala Tinggi
+    const canvas = await html2canvas(cardElem, {
+      scale: 3,             // Tingkatkan skala agar QR & teks tajam
+      useCORS: true,        // Wajib: Mengizinkan rendering gambar dari URL eksternal/CDN
+      allowTaint: false,     // Menghindari canvas tercemar CORS
+      logging: false
+    });
+
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
