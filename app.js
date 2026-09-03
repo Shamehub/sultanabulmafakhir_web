@@ -1770,58 +1770,50 @@ function buildCrudForm(dataObj) {
   }
 
   let keys = Object.keys(sampleData);
-  if (keys.length === 0) keys = ['id', 'nama_file', 'deskripsi', 'url_file', 'ukuran'];
+  if (keys.length === 0) keys = ['id', 'judul', 'kategori', 'tanggal', 'isi', 'status'];
 
   container.innerHTML = keys.map(k => {
     const val = dataObj[k] !== undefined ? dataObj[k] : '';
     const keyLower = k.toLowerCase();
     
+    // Deteksi jenis field
     const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
-    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('logo');
-    const isFileField = keyLower.includes('url_file') || keyLower.includes('file') || keyLower.includes('lampiran');
+    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo');
     const isDateField = keyLower.includes('tanggal') || keyLower.includes('date');
     const isReadOnly = (k === 'id' && currentEditingRowId);
 
-    const colSpanClass = (isLongText || isImageField || isFileField) ? 'md:col-span-2' : 'md:col-span-1';
+    const colSpanClass = (isLongText || isImageField) ? 'md:col-span-2' : 'md:col-span-1';
 
     let inputHtml = '';
 
-    if (isFileField) {
-      // Form khusus File Upload (PDF, DOC, ZIP, DLL)
+    if (isImageField) {
+      // Input bertipe File Upload + Preview Gambar + Input Tersembunyi Penyimpan URL/Base64
       inputHtml = `
         <div class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
           <input type="hidden" name="${k}" id="input_val_${k}" value="${val}">
           
-          <div class="flex items-center gap-2">
-            <input type="file" id="file_picker_${k}" onchange="handleGeneralFileSelect(event, '${k}')" 
+          <div class="flex items-center gap-3">
+            <input type="file" accept="image/*" id="file_picker_${k}" onchange="handleFileSelect(event, '${k}')" 
               class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"/>
           </div>
 
-          <div id="file_info_${k}" class="text-[11px] text-slate-500 flex items-center justify-between ${val ? '' : 'hidden'} bg-white p-2 rounded-lg border border-slate-200 mt-2">
-            <span class="truncate max-w-[250px] font-mono text-emerald-700" id="file_name_disp_${k}">${val || 'File Terpilih'}</span>
-            <a id="file_link_disp_${k}" href="${val}" target="_blank" class="text-blue-600 underline font-semibold text-[10px]">Buka File</a>
-          </div>
-        </div>
-      `;
-    } else if (isImageField) {
-      // Form khusus Upload Gambar
-      inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
-          <input type="hidden" name="${k}" id="input_val_${k}" value="${val}">
-          <input type="file" accept="image/*" id="file_picker_${k}" onchange="handleFileSelect(event, '${k}')" 
-            class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"/>
-          <div id="preview_container_${k}" class="${val ? '' : 'hidden'} mt-2 relative w-28 h-28 rounded-lg overflow-hidden border border-slate-300">
+          <!-- Live Preview Gambar -->
+          <div id="preview_container_${k}" class="${val ? '' : 'hidden'} mt-2 relative w-32 h-32 rounded-lg overflow-hidden border border-slate-300">
             <img id="preview_img_${k}" src="${val}" class="w-full h-full object-cover">
           </div>
         </div>
       `;
     } else if (isLongText) {
-      inputHtml = `<textarea name="${k}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200 h-28 leading-relaxed resize-y">${val}</textarea>`;
+      inputHtml = `<textarea name="${k}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200 h-32 leading-relaxed resize-y">${val}</textarea>`;
     } else if (isDateField) {
-      let formattedDate = val && val.includes('T') ? val.split('T')[0] : val;
+      // Menangani format Tanggal agar tampil presisi sebagai Input Date
+      let formattedDate = val;
+      if (val && val.includes('T')) {
+        formattedDate = val.split('T')[0];
+      }
       inputHtml = `<input type="date" name="${k}" value="${formattedDate}" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200">`;
     } else {
-      inputHtml = `<input type="text" name="${k}" id="input_field_${k}" value="${val}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3.5 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200"'}>`;
+      inputHtml = `<input type="text" name="${k}" value="${val}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3.5 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200"'}>`;
     }
 
     return `
@@ -1836,47 +1828,6 @@ function buildCrudForm(dataObj) {
   }).join('');
 
   if (window.lucide) lucide.createIcons();
-}
-
-// Membaca File Umum (PDF, Word, Zip) & Menghitung Ukuran Otomatis
-function handleGeneralFileSelect(event, fieldKey) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  // 1. Format Ukuran File Otomatis ke Input "ukuran"
-  const bytes = file.size;
-  let formattedSize = '';
-  if (bytes >= 1048576) {
-    formattedSize = (bytes / 1048576).toFixed(1) + ' MB';
-  } else if (bytes >= 1024) {
-    formattedSize = (bytes / 1024).toFixed(1) + ' KB';
-  } else {
-    formattedSize = bytes + ' Bytes';
-  }
-
-  const sizeInput = document.querySelector('input[name="ukuran"]');
-  if (sizeInput) {
-    sizeInput.value = formattedSize;
-  }
-
-  // 2. Baca file sebagai Base64
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const base64Data = e.target.result;
-    
-    document.getElementById(`input_val_${fieldKey}`).value = base64Data;
-    
-    const infoContainer = document.getElementById(`file_info_${fieldKey}`);
-    const fileNameDisp = document.getElementById(`file_name_disp_${fieldKey}`);
-    const fileLinkDisp = document.getElementById(`file_link_disp_${fieldKey}`);
-
-    if (infoContainer) {
-      fileNameDisp.innerText = `${file.name} (${formattedSize})`;
-      fileLinkDisp.classList.add('hidden');
-      infoContainer.classList.remove('hidden');
-    }
-  };
-  reader.readAsDataURL(file);
 }
 
 // Helper untuk membaca file lokal dan membuat Live Preview (Base64 conversion)
