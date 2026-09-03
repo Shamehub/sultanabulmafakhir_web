@@ -1707,4 +1707,3 @@ async function downloadCardPDF() {
         year: 'numeric'
       });
     }
-  </script>
