@@ -225,39 +225,39 @@ function renderBerandaView() {
       </div>
 
       <!-- TENTANG INSTITUSI -->
-      <div onclick="navigate('/profil')" class="group relative bg-amber-100/40 hover:bg-amber-100/70 rounded-3xl p-6 md:p-8 border border-amber-200/80 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800"></div>
-        <div class="flex justify-between items-center border-b border-amber-200/60 pb-4 mb-4">
-          <h3 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2.5 group-hover:text-emerald-900 transition-colors">
-            <div class="w-9 h-9 rounded-xl bg-amber-200/60 text-emerald-900 flex items-center justify-center border border-amber-300/60 group-hover:bg-emerald-700 group-hover:text-white transition-all">
-              <i data-lucide="building-2" class="w-5 h-5"></i>
-            </div>
-            Tentang Ma'had Aly
-          </h3>
-          <div class="text-xs text-emerald-800 group-hover:text-emerald-950 font-bold flex items-center gap-1">
-            <span>Selengkapnya</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+    <div onclick="navigate('/profil')" class="group relative bg-amber-100/40 hover:bg-amber-100/70 rounded-3xl p-6 md:p-8 border border-amber-200/80 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800"></div>
+      <div class="flex justify-between items-center border-b border-amber-200/60 pb-4 mb-4">
+        <h3 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2.5 group-hover:text-emerald-900 transition-colors">
+          <div class="w-9 h-9 rounded-xl bg-amber-200/60 text-emerald-900 flex items-center justify-center border border-amber-300/60 group-hover:bg-emerald-700 group-hover:text-white transition-all">
+            <i data-lucide="building-2" class="w-5 h-5"></i>
           </div>
+          Tentang Ma'had Aly
+        </h3>
+        <div class="text-xs text-emerald-800 group-hover:text-emerald-950 font-bold flex items-center gap-1">
+          <span>Selengkapnya</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
         </div>
-        <p class="text-slate-700 text-xs md:text-sm leading-relaxed whitespace-pre-line line-clamp-3">
-          ${globalData.Setting?.sejarah_singkat || globalData.Setting?.tagline || "Ma'had Aly Sultan Abul Mafakhir merupakan perguruan tinggi keagamaan Islam berbasis pesantren yang berfokus pada pendalaman ilmu-ilmu keislaman (Tafaqquh Fiddin)."}
-        </p>
       </div>
+      <p class="text-slate-700 text-xs md:text-sm leading-relaxed whitespace-pre-line line-clamp-3">
+        ${globalData.Setting?.sejarah_singkat || globalData.Setting?.tagline || "Ma'had Aly Sultan Abul Mafakhir merupakan perguruan tinggi keagamaan Islam berbasis pesantren yang berfokus pada pendalaman ilmu-ilmu keislaman (Tafaqquh Fiddin)."}
+      </p>
+    </div>
 
-      <!-- PROGRAM STUDI -->
-      <div class="space-y-5">
-        <div class="flex justify-between items-end">
-          <div>
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Pilihan Program</span>
-            <h3 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
-              <i data-lucide="book-open" class="w-6 h-6 text-emerald-700"></i> Program Studi Pilihan
-            </h3>
-          </div>
-          <button onclick="navigate('/prodi')" class="text-xs text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 group cursor-pointer">
-            <span>Lihat Semua</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
-          </button>
+    <!-- PROGRAM STUDI -->
+    <div class="space-y-5">
+      <div class="flex justify-between items-end">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Pilihan Program</span>
+          <h3 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <i data-lucide="book-open" class="w-6 h-6 text-emerald-700"></i> Program Studi Pilihan
+          </h3>
         </div>
+        <button onclick="navigate('/prodi')" class="text-xs text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 group cursor-pointer">
+          <span>Lihat Semua</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+        </button>
+      </div>
 
         <div class="grid md:grid-cols-3 gap-6">
           ${(globalData.Prodi || []).slice(0, 3).map(p => `
@@ -1774,47 +1774,11 @@ function buildCrudForm(dataObj) {
 
   container.innerHTML = keys.map(k => {
     const val = dataObj[k] !== undefined ? dataObj[k] : '';
-    const keyLower = k.toLowerCase();
-    
-    // Deteksi jenis field
-    const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
-    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo');
-    const isDateField = keyLower.includes('tanggal') || keyLower.includes('date');
+    const isLongText = k.includes('isi') || k.includes('konten') || k.includes('deskripsi') || k.includes('alamat');
     const isReadOnly = (k === 'id' && currentEditingRowId);
 
-    const colSpanClass = (isLongText || isImageField) ? 'md:col-span-2' : 'md:col-span-1';
-
-    let inputHtml = '';
-
-    if (isImageField) {
-      // Input bertipe File Upload + Preview Gambar + Input Tersembunyi Penyimpan URL/Base64
-      inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
-          <input type="hidden" name="${k}" id="input_val_${k}" value="${val}">
-          
-          <div class="flex items-center gap-3">
-            <input type="file" accept="image/*" id="file_picker_${k}" onchange="handleFileSelect(event, '${k}')" 
-              class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"/>
-          </div>
-
-          <!-- Live Preview Gambar -->
-          <div id="preview_container_${k}" class="${val ? '' : 'hidden'} mt-2 relative w-32 h-32 rounded-lg overflow-hidden border border-slate-300">
-            <img id="preview_img_${k}" src="${val}" class="w-full h-full object-cover">
-          </div>
-        </div>
-      `;
-    } else if (isLongText) {
-      inputHtml = `<textarea name="${k}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200 h-32 leading-relaxed resize-y">${val}</textarea>`;
-    } else if (isDateField) {
-      // Menangani format Tanggal agar tampil presisi sebagai Input Date
-      let formattedDate = val;
-      if (val && val.includes('T')) {
-        formattedDate = val.split('T')[0];
-      }
-      inputHtml = `<input type="date" name="${k}" value="${formattedDate}" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200">`;
-    } else {
-      inputHtml = `<input type="text" name="${k}" value="${val}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3.5 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200"'}>`;
-    }
+    // Tata letak 2 kolom: Textarea/deskripsi mengambil full width (2 kolom)
+    const colSpanClass = isLongText ? 'md:col-span-2' : 'md:col-span-1';
 
     return `
       <div class="space-y-1.5 ${colSpanClass}">
@@ -1822,96 +1786,15 @@ function buildCrudForm(dataObj) {
           <span>${k.replace(/_/g, ' ')}</span>
           ${isReadOnly ? '<span class="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-mono">LOCKED</span>' : ''}
         </label>
-        ${inputHtml}
+        ${isLongText ? 
+          `<textarea name="${k}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200 h-32 leading-relaxed resize-y">${val}</textarea>` : 
+          `<input type="text" name="${k}" value="${val}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3.5 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200"'}>`
+        }
       </div>
     `;
   }).join('');
 
   if (window.lucide) lucide.createIcons();
-}
-
-// Helper untuk membaca file lokal dan membuat Live Preview (Base64 conversion)
-function handleFileSelect(event, fieldKey) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const base64Data = e.target.result;
-    
-    // Set nilai string Base64 ke input hidden
-    document.getElementById(`input_val_${fieldKey}`).value = base64Data;
-    
-    // Tampilkan Live Preview Gambar
-    const imgEl = document.getElementById(`preview_img_${fieldKey}`);
-    const containerEl = document.getElementById(`preview_container_${fieldKey}`);
-    if (imgEl && containerEl) {
-      imgEl.src = base64Data;
-      containerEl.classList.remove('hidden');
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-async function handleCrudSubmit(e) {
-  e.preventDefault();
-  const form = document.getElementById('crud-form');
-  const formData = new FormData(form);
-  const dataPayload = {};
-  formData.forEach((value, key) => dataPayload[key] = value);
-
-  const btn = document.getElementById('btn-save-crud');
-  btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-1"></i> Menyimpan...`;
-  btn.disabled = true;
-  if (window.lucide) lucide.createIcons();
-
-  try {
-    const payload = {
-      action: "adminCRUD",
-      operation: currentEditingRowId ? "UPDATE" : "CREATE",
-      sheetName: activeAdminSheet,
-      data: dataPayload,
-      id: currentEditingRowId
-    };
-
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    const json = await res.json();
-
-    if (json.status === "success") {
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Data dan file gambar telah tersimpan.',
-        confirmButtonColor: '#047857',
-        customClass: { popup: 'rounded-3xl' }
-      });
-      closeCrudModal();
-      await reloadAdminData();
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal Menyimpan',
-        text: json.message || 'Terjadi kesalahan saat menyimpan data.',
-        confirmButtonColor: '#e11d48',
-        customClass: { popup: 'rounded-3xl' }
-      });
-    }
-  } catch (err) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Kesalahan Sistem',
-      text: 'Tidak dapat terhubung ke server.',
-      confirmButtonColor: '#e11d48',
-      customClass: { popup: 'rounded-3xl' }
-    });
-  } finally {
-    btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-brand-yellow inline mr-1"></i> Simpan Data`;
-    btn.disabled = false;
-    if (window.lucide) lucide.createIcons();
-  }
 }
 
 async function handleCrudSubmit(e) {
