@@ -1222,10 +1222,10 @@ async function downloadCardPDF() {
 }
 
 /* ==========================================
-    ADMIN CMS LOGIC & TABEL SPREADSHEET (UPGRADED)
-    ========================================== */
+ADMIN CMS LOGIC & TABEL SPREADSHEET (UPGRADED)
+========================================== */
 
-    function openAdminModal() {
+function openAdminModal() {
       document.getElementById('admin-modal').classList.remove('hidden');
     }
 
