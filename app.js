@@ -484,7 +484,6 @@ function renderProfilView() {
         <!-- MAIN PREMIUM CARD: SEJARAH, VISI & MISI -->
         ${mainItems.length > 0 ? `
           <div class="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden relative">
-            <!-- Top Gradient Border Line -->
             <div class="h-2 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800"></div>
 
             <div class="p-6 md:p-10 divide-y divide-slate-100 space-y-8 md:space-y-10">
@@ -497,17 +496,19 @@ function renderProfilView() {
 
                 return `
                   <div class="${idx !== 0 ? 'pt-8 md:pt-10' : ''} space-y-4">
-                    <!-- Section Header -->
+                    <!-- Section Header dengan Judul yang dapat diklik -->
                     <div class="flex items-center justify-between flex-wrap gap-3">
-                      <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center shadow-sm shrink-0">
+                      <div class="flex items-center gap-3 group cursor-pointer" onclick="navigate('/profil/${slug}')">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center shadow-sm shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
                           <i data-lucide="${iconName}" class="w-5 h-5"></i>
                         </div>
                         <div>
                           <span class="text-[10px] font-extrabold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60 inline-block mb-1">
                             ${type}
                           </span>
-                          <h3 class="text-xl md:text-2xl font-bold text-slate-800">${title}</h3>
+                          <h3 class="text-xl md:text-2xl font-bold text-slate-800 group-hover:text-emerald-700 transition-colors leading-snug">
+                            ${title}
+                          </h3>
                         </div>
                       </div>
 
@@ -560,7 +561,10 @@ function renderProfilView() {
                           <i data-lucide="${iconName}" class="w-5 h-5"></i>
                         </div>
                       </div>
-                      <h3 class="text-lg font-bold text-slate-800 group-hover:text-emerald-700 transition-colors leading-snug mb-3">${title}</h3>
+                      <!-- Judul yang dapat diklik -->
+                      <h3 onclick="navigate('/profil/${slug}')" class="text-lg font-bold text-slate-800 hover:text-emerald-700 transition-colors leading-snug mb-3 cursor-pointer">
+                        ${title}
+                      </h3>
                       <div class="text-xs md:text-sm text-slate-500 leading-relaxed line-clamp-4 whitespace-pre-line mb-6">${content}</div>
                     </div>
                     <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
@@ -583,7 +587,6 @@ function renderProfilView() {
     </div>
   `;
 
-  // Render ulang ikon Lucide jika tersedia
   if (typeof lucide !== 'undefined' && lucide.createIcons) {
     lucide.createIcons();
   }
