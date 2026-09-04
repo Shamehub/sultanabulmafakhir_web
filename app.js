@@ -1796,82 +1796,95 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Fungsi pembantu untuk menerapkan format teks di dalam Textarea
-function applyTextFormat(fieldKey, command, extraVal = null) {
-  const textarea = document.getElementById(`field-${fieldKey}`);
-  if (!textarea) return;
-
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const selectedText = textarea.value.substring(start, end);
-  let formattedText = '';
-
-  switch (command) {
-    case 'bold':
-      formattedText = `<b>${selectedText || 'Teks Tebal'}</b>`;
-      break;
-    case 'italic':
-      formattedText = `<i>${selectedText || 'Teks Miring'}</i>`;
-      break;
-    case 'underline':
-      formattedText = `<u>${selectedText || 'Teks Garis Bawah'}</u>`;
-      break;
-    case 'color':
-      const colorHex = extraVal || '#000000';
-      formattedText = `<span style="color: ${colorHex};">${selectedText || 'Teks Berwarna'}</span>`;
-      break;
-    case 'rtl':
-      formattedText = `<div dir="rtl" style="text-align: right;">${selectedText || 'Teks RTL / Arab'}</div>`;
-      break;
-    
-    // Bullets dengan Indentasi Rapi (Gantung)
-    case 'unordered-list':
-      if (selectedText) {
-        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
-        formattedText = lines.map(line => {
-          const cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
-          return `<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• ${cleanLine}</p>`;
-        }).join('\n');
-      } else {
-        formattedText = '<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 1</p>\n<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 2</p>';
-      }
-      break;
-
-    // Numbering dengan Indentasi Rapi (Gantung)
-    case 'ordered-list':
-      if (selectedText) {
-        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
-        formattedText = lines.map((line, idx) => {
-          const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
-          return `<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">${idx + 1}. ${cleanLine}</p>`;
-        }).join('\n');
-      } else {
-        formattedText = '<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">1. Baris 1</p>\n<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">2. Baris 2</p>';
-      }
-      break;
-
-    case 'align-left':
-      formattedText = `<p style="text-align: left;">${selectedText || 'Teks Rata Kiri'}</p>`;
-      break;
-    case 'align-center':
-      formattedText = `<p style="text-align: center;">${selectedText || 'Teks Rata Tengah'}</p>`;
-      break;
-    case 'align-right':
-      formattedText = `<p style="text-align: right;">${selectedText || 'Teks Rata Kanan'}</p>`;
-      break;
-    case 'align-justify':
-      formattedText = `<p style="text-align: justify;">${selectedText || 'Teks Rata Kiri Kanan'}</p>`;
-      break;
-    default:
-      return;
+function buildCrudForm(dataObj) {
+  const container = document.getElementById('crud-form-fields');
+  let actualKey = Object.keys(globalData).find(k => k.toLowerCase() === activeAdminSheet.toLowerCase());
+  let sampleData = (actualKey && globalData[actualKey] && globalData[actualKey][0]) ? globalData[actualKey][0] : {};
+  
+  if (activeAdminSheet.toLowerCase() === 'setting') {
+    sampleData = { Key: '', Value: '' };
   }
 
-  // Sisipkan teks ke textarea pada posisi kursor/seleksi
-  textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
-  
-  // Kembalikan fokus dan sesuaikan posisi kursor
-  textarea.focus();
-  textarea.setSelectionRange(start, start + formattedText.length);
+  let keys = Object.keys(sampleData);
+  if (keys.length === 0) keys = ['id', 'judul', 'kategori', 'tanggal', 'isi', 'status'];
+
+  container.innerHTML = keys.map(k => {
+    const val = dataObj[k] !== undefined ? dataObj[k] : '';
+    const keyLower = k.toLowerCase();
+    
+    // Deteksi jenis field secara lebih spesifik
+    const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
+    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo');
+    const isFileField = (keyLower.includes('url_file') || keyLower === 'berkas' || keyLower === 'dokumen' || keyLower === 'file_path');
+    const isDateField = keyLower.includes('tanggal') || keyLower.includes('date');
+    const isReadOnly = (k === 'id' && currentEditingRowId);
+
+    const colSpanClass = (isLongText || isImageField || isFileField) ? 'md:col-span-2' : 'md:col-span-1';
+
+    let inputHtml = '';
+
+    if (isImageField) {
+      // Input bertipe File Upload Gambar + Live Preview
+      inputHtml = `
+        <div class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
+          <input type="hidden" name="${k}" id="input_val_${k}" value="${val}">
+          
+          <div class="flex items-center gap-3">
+            <input type="file" accept="image/*" id="file_picker_${k}" onchange="handleFileSelect(event, '${k}', 'image')" 
+              class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"/>
+          </div>
+
+          <!-- Live Preview Gambar -->
+          <div id="preview_container_${k}" class="${val ? '' : 'hidden'} mt-2 relative w-32 h-32 rounded-lg overflow-hidden border border-slate-300">
+            <img id="preview_img_${k}" src="${val}" class="w-full h-full object-cover">
+          </div>
+        </div>
+      `;
+    } else if (isFileField) {
+      // Input Upload Berkas Umum (PDF, DOCX, JPG) + Preview Info File
+      inputHtml = `
+        <div class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
+          <input type="hidden" name="${k}" id="input_val_${k}" value="${val}">
+          
+          <div class="flex items-center gap-3">
+            <input type="file" accept=".pdf,.docx,.doc,.jpg,.jpeg,.png" id="file_picker_${k}" onchange="handleFileSelect(event, '${k}', 'file')" 
+              class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"/>
+          </div>
+
+          <!-- Info Berkas & Preview Terpilih -->
+          <div id="file_info_box_${k}" class="${val ? '' : 'hidden'} text-xs bg-white p-2.5 rounded-lg border border-slate-200 flex items-center justify-between mt-2">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <i data-lucide="file-text" class="w-4 h-4 text-brand-green shrink-0"></i>
+              <span id="file_name_label_${k}" class="truncate text-slate-700 font-medium">${val ? 'Berkas Tersimpan / Terpilih' : ''}</span>
+            </div>
+            <a id="file_link_preview_${k}" href="${val}" target="_blank" class="${val && val.startsWith('http') ? '' : 'hidden'} text-[10px] bg-slate-100 text-brand-green px-2 py-1 rounded hover:bg-slate-200 font-semibold shrink-0">Buka Link</a>
+          </div>
+        </div>
+      `;
+    } else if (isLongText) {
+      inputHtml = `<textarea name="${k}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200 h-32 leading-relaxed resize-y">${val}</textarea>`;
+    } else if (isDateField) {
+      let formattedDate = val;
+      if (val && val.includes('T')) {
+        formattedDate = val.split('T')[0];
+      }
+      inputHtml = `<input type="date" name="${k}" value="${formattedDate}" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200">`;
+    } else {
+      inputHtml = `<input type="text" name="${k}" id="input_val_${k}" value="${val}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3.5 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200"'}>`;
+    }
+
+    return `
+      <div class="space-y-1.5 ${colSpanClass}">
+        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center justify-between">
+          <span>${k.replace(/_/g, ' ')}</span>
+          ${isReadOnly ? '<span class="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-mono">LOCKED</span>' : ''}
+        </label>
+        ${inputHtml}
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
 }
 
 // Handler Pembacaan Berkas (Bisa membedakan Gambar dan PDF/DOCX)
