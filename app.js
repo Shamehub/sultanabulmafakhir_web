@@ -2118,3 +2118,34 @@ function formatDateIndo(dateString) {
     year: 'numeric'
   });
 }
+
+// Variable global untuk menyimpan instance editor
+let quillEditor = null;
+
+function initRichTextEditor(selectorId, initialContent = '') {
+  // Opsi Toolbar sesuai kebutuhan kamu
+  const toolbarOptions = [
+    ['bold', 'italic', 'underline'],        // Tebal, Miring, Garis Bawah
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }], // Penomoran (Ordered & Bullet)
+    [{ 'align': [] }],                     // Rata Kiri, Tengah, Kanan, Justify
+    ['clean']                              // Hapus Formatting
+  ];
+
+  quillEditor = new Quill(selectorId, {
+    modules: {
+      toolbar: toolbarOptions
+    },
+    theme: 'snow',
+    placeholder: 'Tuliskan isi teks di sini...'
+  });
+
+  // Isi konten awal jika sedang dalam mode Edit Data
+  if (initialContent) {
+    quillEditor.root.innerHTML = initialContent;
+  }
+}
+
+// Fungsi untuk mengambil isi HTML dari editor saat form disimpan
+function getEditorContent() {
+  return quillEditor ? quillEditor.root.innerHTML : '';
+}
