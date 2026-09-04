@@ -90,7 +90,11 @@
       <div id="mobile-menu" class="hidden lg:hidden bg-emerald-900 border-t border-emerald-700 px-4 pt-2 pb-4 space-y-2 text-sm font-medium">
         <button onclick="navigate('/beranda')" class="block w-full text-left py-1.5">Beranda</button>
         <button onclick="navigate('/profil')" class="block w-full text-left py-1.5">Profil</button>
-        <button onclick="navigate('/informasi')" class="block w-full text-left py-1.5">Informasi</button>
+        <div class="space-y-1 pl-2 border-l-2 border-brand-yellow/40 my-1">
+    <span class="text-[11px] uppercase tracking-wider text-emerald-300 font-bold block px-2">Tentang Kami</span>
+    <button onclick="navigate('/profil'); toggleMobileMenu()" class="block w-full text-left py-1 px-2 text-xs hover:text-brand-yellow">Profil & Sejarah</button>
+    <button onclick="navigate('/struktur-akademik'); toggleMobileMenu()" class="block w-full text-left py-1 px-2 text-xs hover:text-brand-yellow">Struktur Akademik</button>
+  </div>
         <button onclick="navigate('/prodi')" class="block w-full text-left py-1.5">Program Studi</button>
         <button onclick="navigate('/berita')" class="block w-full text-left py-1.5">Berita</button>
         <button onclick="navigate('/galeri')" class="block w-full text-left py-1.5">Galeri</button>
