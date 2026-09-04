@@ -2251,12 +2251,19 @@ function handleFileSelect(event, fieldKey, type = 'image') {
   const file = event.target.files[0];
   if (!file) return;
 
+  // Temukan elemen input berdasarkan id="field-${k}"
+  const targetInput = document.getElementById(`field-${fieldKey}`);
+
   // Otomatis isi kolom 'ukuran' dan 'nama_file' jika ada di dalam form
   const ukuranInput = document.querySelector('input[name="ukuran"]');
-  if (ukuranInput) ukuranInput.value = formatFileSize(file.size);
+  if (ukuranInput && typeof formatFileSize === 'function') {
+    ukuranInput.value = formatFileSize(file.size);
+  }
 
   const namaFileInput = document.querySelector('input[name="nama_file"]');
-  if (namaFileInput && !namaFileInput.value) namaFileInput.value = file.name;
+  if (namaFileInput && !namaFileInput.value) {
+    namaFileInput.value = file.name;
+  }
 
   // 1. JIKA FILE ADALAH GAMBAR & DIINGINKAN KOMPRESI (Type: image)
   if (type === 'image' && file.type.startsWith('image/')) {
@@ -2282,14 +2289,7 @@ function handleFileSelect(event, fieldKey, type = 'image') {
         ctx.drawImage(img, 0, 0, width, height);
 
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-        document.getElementById(`input_val_${fieldKey}`).value = compressedBase64;
-
-        const imgEl = document.getElementById(`preview_img_${fieldKey}`);
-        const containerEl = document.getElementById(`preview_container_${fieldKey}`);
-        if (imgEl && containerEl) {
-          imgEl.src = compressedBase64;
-          containerEl.classList.remove('hidden');
-        }
+        if (targetInput) targetInput.value = compressedBase64;
       };
     };
     reader.readAsDataURL(file);
@@ -2300,15 +2300,7 @@ function handleFileSelect(event, fieldKey, type = 'image') {
   const reader = new FileReader();
   reader.onload = function(e) {
     const base64Data = e.target.result;
-    document.getElementById(`input_val_${fieldKey}`).value = base64Data;
-
-    // Tampilkan Informasi Berkas Terpilih
-    const infoBox = document.getElementById(`file_info_box_${fieldKey}`);
-    const nameLabel = document.getElementById(`file_name_label_${fieldKey}`);
-    if (infoBox && nameLabel) {
-      nameLabel.innerText = `${file.name} (${formatFileSize(file.size)})`;
-      infoBox.classList.remove('hidden');
-    }
+    if (targetInput) targetInput.value = base64Data;
   };
   reader.readAsDataURL(file);
 }
