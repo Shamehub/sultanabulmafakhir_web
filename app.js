@@ -1246,10 +1246,29 @@ function renderPMBForm() {
   `;
 }
 
-function compressAndBase64(file, maxWidth = 800, quality = 0.6) {
+// Fungsi Helper Pembaca Base64 Khusus PDF / Berkas Non-Gambar
+function fileToBase64(file) {
   return new Promise((resolve) => {
     if (!file) return resolve("");
-    
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = () => resolve("");
+    reader.readAsDataURL(file);
+  });
+}
+
+// Fungsi Kompresi Berkas (Otomatis memisahkan PDF dan Gambar)
+function processFileBase64(file, maxWidth = 800, quality = 0.6) {
+  return new Promise((resolve) => {
+    if (!file) return resolve("");
+
+    // JIKA BERKAS PDF: Lakukan pembacaan Base64 langsung tanpa kompresi Canvas
+    if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+      fileToBase64(file).then((base64) => resolve(base64));
+      return;
+    }
+
+    // JIKA BERKAS GAMBAR: Jalankan proses kompresi via Canvas
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (event) => {
@@ -1270,14 +1289,14 @@ function compressAndBase64(file, maxWidth = 800, quality = 0.6) {
 
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         resolve(canvas.toDataURL('image/jpeg', quality));
       };
       img.onerror = () => resolve("");
     };
     reader.onerror = () => resolve("");
   });
-}
+} 
 
 async function handlePMBSubmit(e) {
   e.preventDefault();
@@ -1300,11 +1319,11 @@ async function handlePMBSubmit(e) {
 
   try {
     const [fotoBase64, ktpBase64, kkBase64, ijazahBase64, skhunBase64] = await Promise.all([
-      compressAndBase64(fotoFile, 600, 0.7),
-      compressAndBase64(ktpFile, 800, 0.6),
-      compressAndBase64(kkFile, 800, 0.6),
-      compressAndBase64(ijazahFile, 800, 0.6),
-      compressAndBase64(skhunFile, 800, 0.6)
+      processFileBase64(fotoFile, 600, 0.7),
+      processFileBase64(ktpFile, 800, 0.6),
+      processFileBase64(kkFile, 800, 0.6),
+      processFileBase64(ijazahFile, 800, 0.6),
+      processFileBase64(skhunFile, 800, 0.6)
     ]);
 
     btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin inline mr-2"></i> Mengirim Data...`;
