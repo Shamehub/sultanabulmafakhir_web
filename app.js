@@ -776,46 +776,6 @@ function renderStrukturAkademikView() {
   if (window.lucide) lucide.createIcons();
 }
 
-function openProfileModal(person) {
-  const modal = document.getElementById('profile-modal');
-  if (!modal) return;
-
-  const fallbackAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80';
-  
-  const img = document.getElementById('modal-img');
-  const nama = document.getElementById('modal-nama');
-  const jabatan = document.getElementById('modal-jabatan');
-  const nidn = document.getElementById('modal-nidn');
-  const ket = document.getElementById('modal-ket');
-
-  img.src = person.foto || fallbackAvatar;
-  img.onerror = () => { img.src = fallbackAvatar; };
-  nama.innerText = person.nama;
-  jabatan.innerText = person.jabatan;
-  
-  if (person.nidn) {
-    nidn.innerText = `NIDN / NIP: ${person.nidn}`;
-    nidn.classList.remove('hidden');
-  } else {
-    nidn.classList.add('hidden');
-  }
-
-  if (person.keterangan) {
-    ket.innerText = person.keterangan;
-    ket.classList.remove('hidden');
-  } else {
-    ket.classList.add('hidden');
-  }
-
-  modal.classList.remove('hidden');
-  if (window.lucide) lucide.createIcons();
-}
-
-function closeProfileModal() {
-  const modal = document.getElementById('profile-modal');
-  if (modal) modal.classList.add('hidden');
-}
-
 function renderInformasiView() {
   const items = globalData.Informasi || [];
 
@@ -1811,7 +1771,7 @@ function renderAdminDashboard() {
 }
 
 function renderAdminSidebarMenu() {
-  const sheets = ['Profil', 'Struktur Akademik', 'Informasi', 'Prodi', 'Berita', 'Galeri', 'Download', 'FormPMB', 'Setting'];
+  const sheets = ['Profil', 'Informasi', 'Prodi', 'Berita', 'Galeri', 'Download', 'FormPMB', 'Setting'];
   const menu = document.getElementById('admin-sheet-menu');
   
   if (!menu) return;
