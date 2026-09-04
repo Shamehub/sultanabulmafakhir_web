@@ -1796,83 +1796,7 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Fungsi pembantu untuk menerapkan format teks di dalam Textarea
-function applyTextFormat(fieldKey, command, extraVal = null) {
-  const textarea = document.getElementById(`field-${fieldKey}`);
-  if (!textarea) return;
-
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const selectedText = textarea.value.substring(start, end);
-  let formattedText = '';
-
-  switch (command) {
-    case 'bold':
-      formattedText = `<b>${selectedText || 'Teks Tebal'}</b>`;
-      break;
-    case 'italic':
-      formattedText = `<i>${selectedText || 'Teks Miring'}</i>`;
-      break;
-    case 'underline':
-      formattedText = `<u>${selectedText || 'Teks Garis Bawah'}</u>`;
-      break;
-    case 'color':
-      const colorHex = extraVal || '#000000';
-      formattedText = `<span style="color: ${colorHex};">${selectedText || 'Teks Berwarna'}</span>`;
-      break;
-    case 'rtl':
-      formattedText = `<div dir="rtl" style="text-align: right;">${selectedText || 'Teks RTL / Arab'}</div>`;
-      break;
-    
-    // Membungkus dengan HTML tag agar indentasi di frontend otomatis rapi
-    case 'unordered-list':
-      if (selectedText) {
-        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
-        const listItems = lines.map(line => `  <li>${line.trim()}</li>`).join('\n');
-        formattedText = `<ul>\n${listItems}\n</ul>`;
-      } else {
-        formattedText = '<ul>\n  <li>Poin 1</li>\n  <li>Poin 2</li>\n</ul>';
-      }
-      break;
-
-    case 'ordered-list':
-      if (selectedText) {
-        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
-        const listItems = lines.map(line => {
-          const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
-          return `  <li>${cleanLine}</li>`;
-        }).join('\n');
-        formattedText = `<ol>\n${listItems}\n</ol>`;
-      } else {
-        formattedText = '<ol>\n  <li>Baris 1</li>\n  <li>Baris 2</li>\n</ol>';
-      }
-      break;
-
-    case 'align-left':
-      formattedText = `<p style="text-align: left;">${selectedText || 'Teks Rata Kiri'}</p>`;
-      break;
-    case 'align-center':
-      formattedText = `<p style="text-align: center;">${selectedText || 'Teks Rata Tengah'}</p>`;
-      break;
-    case 'align-right':
-      formattedText = `<p style="text-align: right;">${selectedText || 'Teks Rata Kanan'}</p>`;
-      break;
-    case 'align-justify':
-      formattedText = `<p style="text-align: justify;">${selectedText || 'Teks Rata Kiri Kanan'}</p>`;
-      break;
-    default:
-      return;
-  }
-
-  // Sisipkan teks ke textarea pada posisi kursor/seleksi
-  textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
-  
-  // Kembalikan fokus dan sesuaikan posisi kursor
-  textarea.focus();
-  textarea.setSelectionRange(start, start + formattedText.length);
-}
-
-function buildCrudForm(dataObj = {}) {
+function buildCrudForm(dataObj) {
   const container = document.getElementById('crud-form-fields');
   let actualKey = Object.keys(globalData).find(k => k.toLowerCase() === activeAdminSheet.toLowerCase());
   let sampleData = (actualKey && globalData[actualKey] && globalData[actualKey][0]) ? globalData[actualKey][0] : {};
@@ -1882,134 +1806,77 @@ function buildCrudForm(dataObj = {}) {
   }
 
   let keys = Object.keys(sampleData);
-  if (keys.length === 0) {
-    if (activeAdminSheet === 'Profil') sampleData = { judul: '', tipe: '', isi: '' };
-    else if (activeAdminSheet === 'Informasi') sampleData = { judul: '', kategori: '', tanggal: '', isi: '' };
-    else if (activeAdminSheet === 'Prodi') sampleData = { nama_prodi: '', gelar: '', akreditasi: '', deskripsi: '' };
-    else if (activeAdminSheet === 'Berita') sampleData = { judul: '', tanggal: '', penulis: '', gambar: '', konten: '' };
-    else if (activeAdminSheet === 'Galeri') sampleData = { judul: '', kategori: '', gambar: '' };
-    else if (activeAdminSheet === 'Download') sampleData = { nama_file: '', deskripsi: '', ukuran: '', url_file: '' };
-    else sampleData = { id: '', judul: '', kategori: '', tanggal: '', isi: '', status: '' };
-    
-    keys = Object.keys(sampleData);
-  }
+  if (keys.length === 0) keys = ['id', 'judul', 'kategori', 'tanggal', 'isi', 'status'];
 
   container.innerHTML = keys.map(k => {
-    let val = dataObj[k] !== undefined ? dataObj[k] : '';
+    const val = dataObj[k] !== undefined ? dataObj[k] : '';
     const keyLower = k.toLowerCase();
     
-    if (keyLower === 'id' && currentEditingRowId) {
-      return `<input type="hidden" name="${k}" id="field-${k}" value="${val}">`;
-    }
-
-    const fieldLabel = k.replace(/_/g, ' ').toUpperCase();
+    // Deteksi jenis field secara lebih spesifik
     const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
-    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo') || keyLower.includes('banner');
-    const isFileField = keyLower.includes('url_file') || keyLower.includes('file') || keyLower.includes('berkas') || keyLower.includes('dokumen') || keyLower === 'file_path';
-    const isDateField = keyLower.includes('tanggal') || keyLower.includes('date') || keyLower.includes('tgl');
-    const isReadOnly = (keyLower === 'id' && currentEditingRowId);
+    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo');
+    const isFileField = (keyLower.includes('url_file') || keyLower === 'berkas' || keyLower === 'dokumen' || keyLower === 'file_path');
+    const isDateField = keyLower.includes('tanggal') || keyLower.includes('date');
+    const isReadOnly = (k === 'id' && currentEditingRowId);
 
     const colSpanClass = (isLongText || isImageField || isFileField) ? 'md:col-span-2' : 'md:col-span-1';
 
     let inputHtml = '';
 
     if (isImageField) {
+      // Input bertipe File Upload Gambar + Live Preview
       inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Unggah Gambar" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
-            <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
-              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-              <span>Pilih & Unggah Gambar</span>
-              <input type="file" accept="image/*" class="hidden" onchange="handleAdminFileUpload(event, 'field-${k}')">
-            </label>
+        <div class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
+          <input type="hidden" name="${k}" id="input_val_${k}" value="${val}">
+          
+          <div class="flex items-center gap-3">
+            <input type="file" accept="image/*" id="file_picker_${k}" onchange="handleFileSelect(event, '${k}', 'image')" 
+              class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"/>
           </div>
-          ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL Gambar: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
+
+          <!-- Live Preview Gambar -->
+          <div id="preview_container_${k}" class="${val ? '' : 'hidden'} mt-2 relative w-32 h-32 rounded-lg overflow-hidden border border-slate-300">
+            <img id="preview_img_${k}" src="${val}" class="w-full h-full object-cover">
+          </div>
         </div>
       `;
     } else if (isFileField) {
+      // Input Upload Berkas Umum (PDF, DOCX, JPG) + Preview Info File
       inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Unggah Berkas Baru" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
-            <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
-              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-              <span>Pilih & Unggah File</span>
-              <input type="file" accept=".pdf,.docx,.doc,.xlsx,.xls,.zip,.rar,.jpg,.jpeg,.png" class="hidden" onchange="handleAdminFileUpload(event, 'field-${k}')">
-            </label>
+        <div class="space-y-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
+          <input type="hidden" name="${k}" id="input_val_${k}" value="${val}">
+          
+          <div class="flex items-center gap-3">
+            <input type="file" accept=".pdf,.docx,.doc,.jpg,.jpeg,.png" id="file_picker_${k}" onchange="handleFileSelect(event, '${k}', 'file')" 
+              class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-green file:text-white hover:file:bg-emerald-800 cursor-pointer"/>
           </div>
-          ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL File: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
+
+          <!-- Info Berkas & Preview Terpilih -->
+          <div id="file_info_box_${k}" class="${val ? '' : 'hidden'} text-xs bg-white p-2.5 rounded-lg border border-slate-200 flex items-center justify-between mt-2">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <i data-lucide="file-text" class="w-4 h-4 text-brand-green shrink-0"></i>
+              <span id="file_name_label_${k}" class="truncate text-slate-700 font-medium">${val ? 'Berkas Tersimpan / Terpilih' : ''}</span>
+            </div>
+            <a id="file_link_preview_${k}" href="${val}" target="_blank" class="${val && val.startsWith('http') ? '' : 'hidden'} text-[10px] bg-slate-100 text-brand-green px-2 py-1 rounded hover:bg-slate-200 font-semibold shrink-0">Buka Link</a>
+          </div>
         </div>
       `;
     } else if (isLongText) {
-      inputHtml = `
-        <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50 focus-within:ring-2 focus-within:ring-brand-green focus-within:bg-white transition duration-200">
-          <!-- Toolbar Formatting -->
-          <div class="flex flex-wrap items-center gap-1 p-2 bg-slate-100 border-b border-slate-200 text-slate-700">
-            <button type="button" onclick="applyTextFormat('${k}', 'bold')" title="Tebal (Bold)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="bold" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'italic')" title="Miring (Italic)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="italic" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'underline')" title="Garis Bawah (Underline)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="underline" class="w-4 h-4"></i>
-            </button>
-            
-            <!-- Color Picker -->
-            <label class="p-1.5 hover:bg-slate-200 rounded-lg transition cursor-pointer flex items-center gap-1" title="Pilih Warna Teks">
-              <i data-lucide="palette" class="w-4 h-4"></i>
-              <input type="color" onchange="applyTextFormat('${k}', 'color', this.value)" class="w-4 h-4 p-0 border-0 bg-transparent cursor-pointer">
-            </label>
-
-            <div class="h-4 w-px bg-slate-300 mx-1"></div>
-
-            <button type="button" onclick="applyTextFormat('${k}', 'unordered-list')" title="Bullets" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="list" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'ordered-list')" title="Penomoran" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="list-ordered" class="w-4 h-4"></i>
-            </button>
-
-            <div class="h-4 w-px bg-slate-300 mx-1"></div>
-
-            <button type="button" onclick="applyTextFormat('${k}', 'align-left')" title="Rata Kiri" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-left" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'align-center')" title="Rata Tengah" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-center" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'align-right')" title="Rata Kanan" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-right" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'align-justify')" title="Rata Kiri-Kanan (Justify)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-justify" class="w-4 h-4"></i>
-            </button>
-
-            <div class="h-4 w-px bg-slate-300 mx-1"></div>
-
-            <button type="button" onclick="applyTextFormat('${k}', 'rtl')" title="Teks RTL (Kanan ke Kiri / Arab)" class="p-1.5 hover:bg-slate-200 rounded-lg transition font-bold text-xs">
-              RTL
-            </button>
-          </div>
-          <!-- Textarea -->
-          <textarea name="${k}" id="field-${k}" rows="5" placeholder="Masukkan ${fieldLabel.toLowerCase()}..." class="w-full p-3 text-xs outline-none bg-transparent leading-relaxed resize-y border-none">${val}</textarea>
-        </div>
-      `;
+      inputHtml = `<textarea name="${k}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200 h-32 leading-relaxed resize-y">${val}</textarea>`;
     } else if (isDateField) {
       let formattedDate = val;
-      if (typeof val === 'string' && val.includes('T')) {
+      if (val && val.includes('T')) {
         formattedDate = val.split('T')[0];
       }
-      inputHtml = `<input type="date" name="${k}" id="field-${k}" value="${formattedDate}" class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-slate-50/50">`;
+      inputHtml = `<input type="date" name="${k}" value="${formattedDate}" class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200">`;
     } else {
-      inputHtml = `<input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="Masukkan ${fieldLabel.toLowerCase()}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-slate-50/50"'}>`;
+      inputHtml = `<input type="text" name="${k}" id="input_val_${k}" value="${val}" placeholder="Masukkan ${k.replace(/_/g, ' ')}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3.5 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-slate-50/50 hover:bg-white focus:bg-white transition duration-200"'}>`;
     }
 
     return `
       <div class="space-y-1.5 ${colSpanClass}">
-        <label class="block text-xs font-bold text-slate-700 tracking-wide flex items-center justify-between">
-          <span>${fieldLabel}</span>
+        <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center justify-between">
+          <span>${k.replace(/_/g, ' ')}</span>
           ${isReadOnly ? '<span class="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-mono">LOCKED</span>' : ''}
         </label>
         ${inputHtml}
