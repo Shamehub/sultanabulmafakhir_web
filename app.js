@@ -2130,44 +2130,47 @@ function buildCrudForm(dataObj = {}) {
     }
 
     const fieldLabel = k.replace(/_/g, ' ').toUpperCase();
-    const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
-    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo') || keyLower.includes('banner');
-    const isFileField = keyLower.includes('url_file') || keyLower.includes('file') || keyLower.includes('berkas') || keyLower.includes('dokumen') || keyLower === 'file_path';
-    const isDateField = keyLower.includes('tanggal') || keyLower.includes('date') || keyLower.includes('tgl');
-    const isReadOnly = (keyLower === 'id' && currentEditingRowId);
+const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
+const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo') || keyLower.includes('banner');
+const isFileField = keyLower.includes('url_file') || keyLower.includes('file') || keyLower.includes('berkas') || keyLower.includes('dokumen') || keyLower === 'file_path';
+const isDateField = keyLower.includes('tanggal') || keyLower.includes('date') || keyLower.includes('tgl');
+const isReadOnly = (keyLower === 'id' && currentEditingRowId);
 
-    const colSpanClass = (isLongText || isImageField || isFileField) ? 'md:col-span-2' : 'md:col-span-1';
+const colSpanClass = (isLongText || isImageField || isFileField) ? 'md:col-span-2' : 'md:col-span-1';
 
-    let inputHtml = '';
+let inputHtml = '';
 
-    if (isImageField) {
-      inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Unggah Gambar" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
-            <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
-              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-              <span>Pilih & Unggah Gambar</span>
-              <input type="file" accept="image/*" class="hidden" onchange="handleAdminFileUpload(event, 'field-${k}')">
-            </label>
-          </div>
-          ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL Gambar: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
-        </div>
-      `;
-    } else if (isFileField) {
-      inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Unggah Berkas Baru" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
-            <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
-              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-              <span>Pilih & Unggah File</span>
-              <input type="file" accept=".pdf,.docx,.doc,.xlsx,.xls,.zip,.rar,.jpg,.jpeg,.png" class="hidden" onchange="handleAdminFileUpload(event, 'field-${k}')">
-            </label>
-          </div>
-          ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL File: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
-        </div>
-      `;
+if (isImageField) {
+  inputHtml = `
+    <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Data Base64 Gambar" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
+        <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
+          <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+          <span>Pilih Gambar</span>
+          <!-- Mengirimkan 'image' ke handleFileSelect -->
+          <input type="file" accept="image/*" class="hidden" onchange="handleFileSelect(event, '${k}', 'image')">
+        </label>
+      </div>
+      ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL/Data Gambar: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
+    </div>
+  `;
+} else if (isFileField) {
+  inputHtml = `
+    <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Data Base64 Berkas" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
+        <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
+          <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+          <span>Pilih Berkas</span>
+          <!-- Mengirimkan 'file' ke handleFileSelect dan membuka filter untuk PDF, DOCX, XLSX, ZIP, dll -->
+          <input type="file" accept=".pdf,.docx,.doc,.xlsx,.xls,.zip,.rar,.jpg,.jpeg,.png" class="hidden" onchange="handleFileSelect(event, '${k}', 'file')">
+        </label>
+      </div>
+      ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL/Data Berkas: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
+    </div>
+  `;
+}
     } else if (isLongText) {
       inputHtml = `
         <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50 focus-within:ring-2 focus-within:ring-brand-green focus-within:bg-white transition duration-200">
