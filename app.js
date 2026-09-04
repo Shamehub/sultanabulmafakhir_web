@@ -643,48 +643,59 @@ function renderStrukturAkademikView() {
     jabatan: item.jabatan || item.Jabatan || 'Staf / Pengampu',
     foto: item.foto || item.Foto || '',
     nidn: item.nidn || item.NIDN || item.nip || '',
+    keterangan: item.keterangan || item.Keterangan || '',
     urutan: Number(item.urutan || item.Urutan || 99)
   })).sort((a, b) => a.urutan - b.urutan);
 
-  const topLeader = items[0]; // Pimpinan Utama (Mudir / Ketua)
-  const subordinates = items.slice(1); // Pengurus / Dosen lainnya
+  const topLeader = items[0];
+  const subordinates = items.slice(1);
   const fallbackAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80';
 
-  // Card Generator untuk Bagan
-  const createNodeCard = (person, isTop = false) => `
-    <div class="relative flex flex-col items-center group">
-      <div class="w-64 md:w-72 bg-white rounded-2xl border-2 ${isTop ? 'border-amber-400 shadow-xl' : 'border-emerald-700/30 shadow-md'} hover:shadow-2xl transition-all duration-300 overflow-hidden relative z-10">
-        <div class="h-2 ${isTop ? 'bg-gradient-to-r from-amber-400 via-emerald-600 to-amber-500' : 'bg-emerald-800'}"></div>
-        <div class="p-5 text-center flex flex-col items-center">
-          <div class="relative mb-3">
-            <div class="w-20 h-20 rounded-full p-1 ${isTop ? 'bg-gradient-to-tr from-amber-400 to-emerald-700' : 'bg-emerald-100'} shadow-md">
-              <img 
-                src="${person.foto || fallbackAvatar}" 
-                alt="${person.nama}" 
-                class="w-full h-full object-cover rounded-full bg-slate-100 border border-white"
-                onerror="this.onerror=null; this.src='${fallbackAvatar}';"
-              />
+  // Card Generator untuk Bagan (Tambahkan atribut onclick & cursor-pointer)
+  const createNodeCard = (person, isTop = false, index = 0) => {
+    const jsonString = JSON.stringify(person).replace(/"/g, '&quot;');
+    return `
+      <div class="relative flex flex-col items-center group">
+        <div 
+          onclick="openProfileModal(${jsonString})"
+          class="w-64 md:w-72 bg-white rounded-2xl border-2 ${isTop ? 'border-amber-400 shadow-xl' : 'border-emerald-700/30 shadow-md'} hover:shadow-2xl hover:border-amber-500 transition-all duration-300 overflow-hidden relative z-10 cursor-pointer transform hover:-translate-y-1"
+        >
+          <div class="h-2 ${isTop ? 'bg-gradient-to-r from-amber-400 via-emerald-600 to-amber-500' : 'bg-emerald-800'}"></div>
+          <div class="p-5 text-center flex flex-col items-center">
+            <div class="relative mb-3">
+              <div class="w-20 h-20 rounded-full p-1 ${isTop ? 'bg-gradient-to-tr from-amber-400 to-emerald-700' : 'bg-emerald-100'} shadow-md">
+                <img 
+                  src="${person.foto || fallbackAvatar}" 
+                  alt="${person.nama}" 
+                  class="w-full h-full object-cover rounded-full bg-slate-100 border border-white"
+                  onerror="this.onerror=null; this.src='${fallbackAvatar}';"
+                />
+              </div>
+              ${isTop ? `
+                <span class="absolute -bottom-1 -right-1 bg-amber-400 text-slate-900 p-1 rounded-full shadow border border-white">
+                  <i data-lucide="crown" class="w-3.5 h-3.5"></i>
+                </span>
+              ` : ''}
             </div>
-            ${isTop ? `
-              <span class="absolute -bottom-1 -right-1 bg-amber-400 text-slate-900 p-1 rounded-full shadow border border-white">
-                <i data-lucide="crown" class="w-3.5 h-3.5"></i>
-              </span>
-            ` : ''}
+
+            <span class="inline-block px-3 py-0.5 rounded-full ${isTop ? 'bg-amber-100 text-amber-900 font-extrabold' : 'bg-emerald-50 text-emerald-800 font-bold'} text-[10px] tracking-wider uppercase mb-1 border border-amber-200">
+              ${person.jabatan}
+            </span>
+
+            <h4 class="font-bold text-slate-800 text-sm md:text-base leading-snug group-hover:text-emerald-800 transition">
+              ${person.nama}
+            </h4>
+
+            ${person.nidn ? `<p class="text-[10px] text-slate-400 font-mono mt-1">NIDN: ${person.nidn}</p>` : ''}
+            
+            <span class="text-[10px] font-semibold text-emerald-600 mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <i data-lucide="maximize-2" class="w-3 h-3"></i> Klik untuk detail
+            </span>
           </div>
-
-          <span class="inline-block px-3 py-0.5 rounded-full ${isTop ? 'bg-amber-100 text-amber-900 font-extrabold' : 'bg-emerald-50 text-emerald-800 font-bold'} text-[10px] tracking-wider uppercase mb-1 border border-amber-200">
-            ${person.jabatan}
-          </span>
-
-          <h4 class="font-bold text-slate-800 text-sm md:text-base leading-snug group-hover:text-emerald-800 transition">
-            ${person.nama}
-          </h4>
-
-          ${person.nidn ? `<p class="text-[10px] text-slate-400 font-mono mt-1">NIDN: ${person.nidn}</p>` : ''}
         </div>
       </div>
-    </div>
-  `;
+    `;
+  };
 
   container.innerHTML = `
     <div class="max-w-6xl mx-auto space-y-8 pb-12">
@@ -701,7 +712,7 @@ function renderStrukturAkademikView() {
             </h1>
           </div>
           <p class="text-xs text-slate-500 max-w-md">
-            Hierarki kepemimpinan, dewan kiai, dan staf pengampu Ma'had Aly Sultan Abul Mafakhir.
+            Klik pada salah satu kartu pengurus untuk melihat detail profil dan foto ukuran penuh.
           </p>
         </div>
       </div>
@@ -712,25 +723,22 @@ function renderStrukturAkademikView() {
           
           <!-- LEVEL 1: Pimpinan Utama -->
           <div class="flex justify-center">
-            ${createNodeCard(topLeader, true)}
+            ${createNodeCard(topLeader, true, 0)}
           </div>
 
           ${subordinates.length > 0 ? `
-            <!-- Garis Vertikal dari Pimpinan -->
             <div class="w-0.5 h-8 bg-emerald-700/60"></div>
 
-            <!-- Garis Horisontal Pembagi Cabang -->
             <div class="relative w-full max-w-3xl flex items-center justify-center">
               <div class="w-full h-0.5 bg-emerald-700/60"></div>
             </div>
 
             <!-- LEVEL 2: Pengurus / Subordinat -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-0 w-full pt-4">
-              ${subordinates.map(sub => `
+              ${subordinates.map((sub, idx) => `
                 <div class="flex flex-col items-center relative">
-                  <!-- Garis Vertikal ke Kartu Anggota -->
                   <div class="w-0.5 h-4 bg-emerald-700/60 -mt-4 mb-2"></div>
-                  ${createNodeCard(sub, false)}
+                  ${createNodeCard(sub, false, idx + 1)}
                 </div>
               `).join('')}
             </div>
@@ -739,9 +747,73 @@ function renderStrukturAkademikView() {
         </div>
       </div>
     </div>
+
+    <!-- Modal Lightbox Profil -->
+    <div id="profile-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-100 transform transition-all relative">
+        
+        <!-- Tombol Tutup -->
+        <button onclick="closeProfileModal()" class="absolute top-3 right-3 z-10 bg-slate-900/50 hover:bg-slate-900 text-white rounded-full p-2 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Container Foto Penuh -->
+        <div class="w-full h-80 bg-slate-900 relative">
+          <img id="modal-img" src="" alt="" class="w-full h-full object-contain" />
+        </div>
+
+        <!-- Detail Informasi -->
+        <div class="p-6 text-center space-y-3">
+          <span id="modal-jabatan" class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold uppercase tracking-wider"></span>
+          <h3 id="modal-nama" class="text-xl font-extrabold text-slate-900 leading-snug"></h3>
+          <p id="modal-nidn" class="text-xs text-slate-400 font-mono"></p>
+          <p id="modal-ket" class="text-xs text-slate-600 leading-relaxed pt-2 border-t border-slate-100 hidden"></p>
+        </div>
+      </div>
+    </div>
   `;
 
   if (window.lucide) lucide.createIcons();
+}
+
+function openProfileModal(person) {
+  const modal = document.getElementById('profile-modal');
+  if (!modal) return;
+
+  const fallbackAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80';
+  
+  const img = document.getElementById('modal-img');
+  const nama = document.getElementById('modal-nama');
+  const jabatan = document.getElementById('modal-jabatan');
+  const nidn = document.getElementById('modal-nidn');
+  const ket = document.getElementById('modal-ket');
+
+  img.src = person.foto || fallbackAvatar;
+  img.onerror = () => { img.src = fallbackAvatar; };
+  nama.innerText = person.nama;
+  jabatan.innerText = person.jabatan;
+  
+  if (person.nidn) {
+    nidn.innerText = `NIDN / NIP: ${person.nidn}`;
+    nidn.classList.remove('hidden');
+  } else {
+    nidn.classList.add('hidden');
+  }
+
+  if (person.keterangan) {
+    ket.innerText = person.keterangan;
+    ket.classList.remove('hidden');
+  } else {
+    ket.classList.add('hidden');
+  }
+
+  modal.classList.remove('hidden');
+  if (window.lucide) lucide.createIcons();
+}
+
+function closeProfileModal() {
+  const modal = document.getElementById('profile-modal');
+  if (modal) modal.classList.add('hidden');
 }
 
 function renderInformasiView() {
