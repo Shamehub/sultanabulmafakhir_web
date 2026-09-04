@@ -55,6 +55,18 @@
 
         <nav class="hidden lg:flex space-x-5 text-sm font-semibold items-center">
           <button onclick="navigate('/beranda')" class="hover:text-brand-yellow transition">Beranda</button>
+          <div class="relative group py-2">
+          <button onclick="navigate('/profil')" class="hover:text-brand-yellow transition flex items-center gap-1">
+            Profil <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-hover:rotate-180"></i>
+          </button>
+          <div class="absolute left-0 top-full hidden group-hover:block w-52 bg-emerald-950 text-white rounded-xl shadow-2xl border border-emerald-700/60 p-2 z-50 backdrop-blur-md">
+            <button onclick="navigate('/profil')" class="w-full text-left px-3 py-2 text-xs font-medium rounded-lg hover:bg-emerald-800 hover:text-brand-yellow transition flex items-center gap-2">
+              <i data-lucide="building-2" class="w-3.5 h-3.5"></i> Profil & Sejarah
+            </button>
+            <button onclick="navigate('/struktur-akademik')" class="w-full text-left px-3 py-2 text-xs font-medium rounded-lg hover:bg-emerald-800 hover:text-brand-yellow transition flex items-center gap-2">
+              <i data-lucide="network" class="w-3.5 h-3.5"></i> Struktur Akademik
+            </button>
+          </div>
           <button onclick="navigate('/profil')" class="hover:text-brand-yellow transition">Profil</button>
           <button onclick="navigate('/informasi')" class="hover:text-brand-yellow transition">Informasi</button>
           <button onclick="navigate('/prodi')" class="hover:text-brand-yellow transition">Program Studi</button>
@@ -269,6 +281,4 @@
 
   <!-- Script JavaScript Utama -->
   <script src="app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
-</body>
-</html>
+  <script src="https://cdn.jsdel
