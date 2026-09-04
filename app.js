@@ -1811,7 +1811,7 @@ function renderAdminDashboard() {
 }
 
 function renderAdminSidebarMenu() {
-  const sheets = ['Profil', 'Informasi', 'Prodi', 'Berita', 'Galeri', 'Download', 'FormPMB', 'Setting'];
+  const sheets = ['Profil', 'Struktur Akademik'Informasi', 'Prodi', 'Berita', 'Galeri', 'Download', 'FormPMB', 'Setting'];
   const menu = document.getElementById('admin-sheet-menu');
   
   if (!menu) return;
