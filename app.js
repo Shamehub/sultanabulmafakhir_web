@@ -2101,31 +2101,22 @@ function buildCrudForm(dataObj = {}) {
 
   let keys = Object.keys(sampleData);
   if (keys.length === 0) {
-    if (activeAdminSheet === 'Profil') sampleData = { id: '', judul: '', tipe: '', isi: '' };
-    else if (activeAdminSheet === 'Struktur Akademik') sampleData = { id: '', nama: '', jabatan: '', foto: '', urutan: '', nidn: '', keterangan: '' };
-    else if (activeAdminSheet === 'Informasi') sampleData = { id: '', judul: '', kategori: '', tanggal: '', isi: '' };
-    else if (activeAdminSheet === 'Prodi') sampleData = { id: '', nama_prodi: '', gelar: '', akreditasi: '', deskripsi: '' };
-    else if (activeAdminSheet === 'Berita') sampleData = { id: '', judul: '', tanggal: '', penulis: '', gambar: '', konten: '' };
-    else if (activeAdminSheet === 'Galeri') sampleData = { id: '', judul: '', kategori: '', gambar: '' };
-    else if (activeAdminSheet === 'Download') sampleData = { id: '', nama_file: '', deskripsi: '', ukuran: '', url_file: '' };
+    if (activeAdminSheet === 'Profil') sampleData = { judul: '', tipe: '', isi: '' };
+    else if (activeAdminSheet === 'Informasi') sampleData = { judul: '', kategori: '', tanggal: '', isi: '' };
+    else if (activeAdminSheet === 'Prodi') sampleData = { nama_prodi: '', gelar: '', akreditasi: '', deskripsi: '' };
+    else if (activeAdminSheet === 'Berita') sampleData = { judul: '', tanggal: '', penulis: '', gambar: '', konten: '' };
+    else if (activeAdminSheet === 'Galeri') sampleData = { judul: '', kategori: '', gambar: '' };
+    else if (activeAdminSheet === 'Download') sampleData = { nama_file: '', deskripsi: '', ukuran: '', url_file: '' };
     else sampleData = { id: '', judul: '', kategori: '', tanggal: '', isi: '', status: '' };
     
     keys = Object.keys(sampleData);
-  }
-
-  // --- FIX UTAMA: Pastikan field 'id' SELALU ada saat mode Edit ---
-  const hasIdKey = keys.some(k => k.toLowerCase() === 'id');
-  if (currentEditingRowId && !hasIdKey) {
-    keys.unshift('id'); // Sisipkan kunci 'id' di paling awal array keys
   }
 
   container.innerHTML = keys.map(k => {
     let val = dataObj[k] !== undefined ? dataObj[k] : '';
     const keyLower = k.toLowerCase();
     
-    // Jika sedang Edit dan ini adalah field ID, paksa nilai ID lama masuk ke hidden input
     if (keyLower === 'id' && currentEditingRowId) {
-      val = val || currentEditingRowId;
       return `<input type="hidden" name="${k}" id="field-${k}" value="${val}">`;
     }
 
@@ -2171,6 +2162,7 @@ function buildCrudForm(dataObj = {}) {
     } else if (isLongText) {
       inputHtml = `
         <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50 focus-within:ring-2 focus-within:ring-brand-green focus-within:bg-white transition duration-200">
+          <!-- Toolbar Formatting -->
           <div class="flex flex-wrap items-center gap-1 p-2 bg-slate-100 border-b border-slate-200 text-slate-700">
             <button type="button" onclick="applyTextFormat('${k}', 'bold')" title="Tebal (Bold)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
               <i data-lucide="bold" class="w-4 h-4"></i>
@@ -2182,6 +2174,7 @@ function buildCrudForm(dataObj = {}) {
               <i data-lucide="underline" class="w-4 h-4"></i>
             </button>
             
+            <!-- Color Picker -->
             <label class="p-1.5 hover:bg-slate-200 rounded-lg transition cursor-pointer flex items-center gap-1" title="Pilih Warna Teks">
               <i data-lucide="palette" class="w-4 h-4"></i>
               <input type="color" onchange="applyTextFormat('${k}', 'color', this.value)" class="w-4 h-4 p-0 border-0 bg-transparent cursor-pointer">
@@ -2217,6 +2210,7 @@ function buildCrudForm(dataObj = {}) {
               RTL
             </button>
           </div>
+          <!-- Textarea -->
           <textarea name="${k}" id="field-${k}" rows="5" placeholder="Masukkan ${fieldLabel.toLowerCase()}..." class="w-full p-3 text-xs outline-none bg-transparent leading-relaxed resize-y border-none">${val}</textarea>
         </div>
       `;
