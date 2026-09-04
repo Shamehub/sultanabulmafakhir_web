@@ -143,6 +143,7 @@ function handleRouting(pathname) {
   switch (mainSection) {
     case 'beranda': renderBerandaView(); break;
     case 'profil': renderProfilView(); break;
+    case 'struktur-akademik': renderStrukturAkademikView(); break; // <-- Ditambahkan di sini
     case 'informasi': renderInformasiView(); break;
     case 'prodi': renderProdiView(); break;
     case 'berita': renderBeritaView(); break;
