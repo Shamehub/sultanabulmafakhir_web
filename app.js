@@ -1719,529 +1719,206 @@ async function downloadCardPDF() {
 }
 
 /* ==========================================
-ADMIN CMS LOGIC & TABEL SPREADSHEET (UPGRADED)
+LOGIKA SIMPAN, HAPUS & UPLOAD FILE/GAMBAR
 ========================================== */
 
-function openAdminModal() {
-  document.getElementById('admin-modal').classList.remove('hidden');
-}
+// Handle Unggah File ke Google Drive via Web App (Base64)
+async function handleAdminFileUpload(event, targetInputId) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-function closeAdminModal() {
-  document.getElementById('admin-modal').classList.add('hidden');
-}
+  // Batas ukuran berkas max 5MB
+  if (file.size > 5 * 1024 * 1024) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Berkas Terlalu Besar',
+      text: 'Maksimal ukuran berkas yang diunggah adalah 5 MB.',
+      customClass: { popup: 'rounded-3xl' }
+    });
+    return;
+  }
 
-async function handleAdminAuth(e) {
-  e.preventDefault();
-  const btn = document.getElementById('btn-login-admin');
-  const pass = document.getElementById('admin-pass-input').value;
+  const targetInput = document.getElementById(targetInputId);
+  const originalText = targetInput.value;
+  targetInput.value = "Mengunggah berkas, mohon tunggu...";
+  targetInput.disabled = true;
+
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
   
-  btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-1"></i> Memverifikasi...`;
-  btn.disabled = true;
+  reader.onload = async function () {
+    const rawBase64 = reader.result.split(',')[1];
+    
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: "uploadFile",
+          fileName: file.name,
+          mimeType: file.type,
+          fileData: rawBase64
+        })
+      });
+
+      const json = await res.json();
+
+      if (json.status === "success" && json.url) {
+        targetInput.value = json.url;
+        
+        // Otomatis isi kolom 'ukuran' jika field tersebut ada di form
+        const sizeField = document.getElementById('field-ukuran');
+        if (sizeField && typeof formatFileSize === 'function') {
+          sizeField.value = formatFileSize(file.size);
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Unggah Berhasil',
+          text: 'File berhasil diunggah ke Google Drive.',
+          timer: 1500,
+          showConfirmButton: false,
+          customClass: { popup: 'rounded-3xl' }
+        });
+      } else {
+        throw new Error(json.message || "Gagal mengunggah berkas.");
+      }
+    } catch (err) {
+      targetInput.value = originalText;
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Unggah',
+        text: err.message || 'Terjadi kesalahan saat mengunggah berkas.',
+        customClass: { popup: 'rounded-3xl' }
+      });
+    } finally {
+      targetInput.disabled = false;
+    }
+  };
+}
+
+// Handle Submit Form Simpan/Update Data
+async function handleCrudSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+  const dataObj = {};
+
+  formData.forEach((val, key) => {
+    dataObj[key] = val;
+  });
+
+  const btnSave = document.getElementById('btn-save-crud');
+  const originalBtnHtml = btnSave.innerHTML;
+  
+  btnSave.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin inline mr-1"></i> Menyimpan...`;
+  btnSave.disabled = true;
   if (window.lucide) lucide.createIcons();
+
+  const isEdit = !!currentEditingRowId;
+  const payload = {
+    action: isEdit ? "updateData" : "addData",
+    sheetName: activeAdminSheet,
+    data: dataObj
+  };
+
+  if (isEdit) {
+    payload.id = currentEditingRowId;
+  }
 
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: "adminLogin", password: pass })
+      body: JSON.stringify(payload)
     });
-    const json = await res.json();
     
+    const json = await res.json();
+
     if (json.status === "success") {
-      closeAdminModal();
-      document.getElementById('app').classList.add('hidden');
-      document.getElementById('admin-cms').classList.remove('hidden');
-      renderAdminDashboard();
-      
+      closeCrudModal();
+      await reloadAdminData();
+
       Swal.fire({
         icon: 'success',
-        title: 'Berhasil Masuk',
-        text: 'Selamat datang di Control Panel Admin.',
+        title: 'Berhasil Disimpan',
+        text: `Data pada sheet "${activeAdminSheet}" berhasil diperbarui.`,
         timer: 2000,
         showConfirmButton: false,
         customClass: { popup: 'rounded-3xl' }
       });
     } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Akses Ditolak',
-        text: json.message || "Password Admin Salah!",
-        confirmButtonColor: '#e11d48',
-        customClass: { popup: 'rounded-3xl' }
-      });
+      throw new Error(json.message || "Gagal menyimpan data.");
     }
   } catch (err) {
     Swal.fire({
       icon: 'error',
-      title: 'Kesalahan Sistem',
-      text: 'Terjadi kesalahan autentikasi.',
-      confirmButtonColor: '#e11d48',
+      title: 'Gagal Menyimpan',
+      text: err.message || 'Terjadi kesalahan sistem.',
       customClass: { popup: 'rounded-3xl' }
     });
   } finally {
-    btn.innerHTML = `Masuk Ke Control Panel`;
-    btn.disabled = false;
+    btnSave.innerHTML = originalBtnHtml;
+    btnSave.disabled = false;
+    if (window.lucide) lucide.createIcons();
   }
 }
 
-function logoutAdmin() {
+// Handle Hapus Data Baris Spreadsheet
+function deleteDataRow(rowIdentifier) {
   Swal.fire({
-    title: 'Keluar Admin?',
-    text: 'Anda akan keluar dari sesi Control Panel.',
-    icon: 'question',
+    title: 'Hapus Data Ini?',
+    text: `Data dengan ID/Kunci "${rowIdentifier}" di sheet "${activeAdminSheet}" akan dihapus permanen.`,
+    icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#047857',
+    confirmButtonColor: '#e11d48',
     cancelButtonColor: '#64748b',
-    confirmButtonText: 'Ya, Keluar',
+    confirmButtonText: 'Ya, Hapus Data',
     cancelButtonText: 'Batal',
     customClass: { popup: 'rounded-3xl' }
-  }).then((result) => {
+  }).then(async (result) => {
     if (result.isConfirmed) {
-      document.getElementById('admin-cms').classList.add('hidden');
-      document.getElementById('app').classList.remove('hidden');
-      navigate('/beranda');
+      Swal.fire({
+        title: 'Memproses Hapus...',
+        text: 'Mohon tunggu sebentar.',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+        customClass: { popup: 'rounded-3xl' }
+      });
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: "deleteData",
+            sheetName: activeAdminSheet,
+            id: rowIdentifier
+          })
+        });
+
+        const json = await res.json();
+
+        if (json.status === "success") {
+          await reloadAdminData();
+          Swal.fire({
+            icon: 'success',
+            title: 'Terhapus!',
+            text: 'Data berhasil dihapus.',
+            timer: 1500,
+            showConfirmButton: false,
+            customClass: { popup: 'rounded-3xl' }
+          });
+        } else {
+          throw new Error(json.message || "Gagal menghapus data.");
+        }
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Menghapus',
+          text: err.message || 'Terjadi kesalahan saat menghapus data.',
+          customClass: { popup: 'rounded-3xl' }
+        });
+      }
     }
   });
-}
-
-function renderAdminDashboard() {
-  renderAdminSidebarMenu();
-  renderAdminStats();
-  renderAdminTable(activeAdminSheet);
-  if (window.lucide) lucide.createIcons();
-}
-
-function renderAdminSidebarMenu() {
-  const sheets = ['Profil', 'Struktur Akademik', 'Informasi', 'Prodi', 'Berita', 'Galeri', 'Download', 'FormPMB', 'Setting'];
-  const menu = document.getElementById('admin-sheet-menu');
-  
-  if (!menu) return;
-
-  menu.innerHTML = sheets.map(sheet => {
-    let actualKey = Object.keys(globalData || {}).find(k => k.toLowerCase() === sheet.toLowerCase());
-    let count = 0;
-    if (actualKey && globalData[actualKey]) {
-      count = Array.isArray(globalData[actualKey]) ? globalData[actualKey].length : (sheet === 'Setting' ? Object.keys(globalData.Setting || {}).length : 0);
-    }
-    
-    return `
-      <button 
-        onclick="handleAdminMenuClick('${sheet}')" 
-        class="w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center justify-between ${activeAdminSheet === sheet ? 'bg-brand-green text-white font-bold shadow-md' : 'hover:bg-slate-700/60 text-slate-300'}"
-      >
-        <span class="flex items-center gap-2 text-xs">
-          <i data-lucide="file-text" class="w-4 h-4 text-brand-yellow"></i> ${sheet}
-        </span>
-        <span class="text-[10px] bg-slate-900/60 px-2 py-0.5 rounded-full text-slate-300 font-mono">${count}</span>
-      </button>
-    `;
-  }).join('');
-
-  if (window.lucide) lucide.createIcons();
-}
-
-// 1. Function Toggle Bawaan Anda (Dipertahankan)
-function toggleAdminSidebar() {
-  const sidebar = document.getElementById('admin-sidebar');
-  if (sidebar) sidebar.classList.toggle('hidden');
-}
-
-// 2. Function Tutup Sidebar Otomatis saat Menu Diklik
-function closeAdminSidebar() {
-  // Hanya tutup otomatis di layar HP/Mobile (lebar layar < 768px)
-  if (window.innerWidth < 768) {
-    const sidebar = document.getElementById('admin-sidebar');
-    if (sidebar) sidebar.classList.add('hidden');
-  }
-}
-
-// 3. Wrapper Handler saat Menu Diklik
-function handleAdminMenuClick(sheet) {
-  if (typeof switchAdminSheet === 'function') {
-    switchAdminSheet(sheet);
-  } else {
-    activeAdminSheet = sheet;
-    renderAdminSidebarMenu();
-    if (typeof renderAdminSheetView === 'function') renderAdminSheetView(sheet);
-  }
-
-  // Panggil penutup sidebar
-  closeAdminSidebar();
-}
-
-function renderAdminStats() {
-  let pmbKey = Object.keys(globalData).find(k => k.toLowerCase() === 'formpmb') || 'FormPMB';
-  const stats = [
-    { title: 'Total Mahasantri (PMB)', count: (globalData[pmbKey] || []).length, icon: 'users', color: 'bg-blue-600' },
-    { title: 'Program Studi', count: (globalData.Prodi || []).length, icon: 'book-open', color: 'bg-emerald-600' },
-    { title: 'Pengumuman / Info', count: (globalData.Informasi || []).length, icon: 'bell', color: 'bg-amber-500' },
-    { title: 'Berita Ditayangkan', count: (globalData.Berita || []).length, icon: 'newspaper', color: 'bg-purple-600' }
-  ];
-
-  document.getElementById('admin-stats-cards').innerHTML = stats.map(s => `
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex items-center justify-between">
-      <div>
-        <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">${s.title}</p>
-        <h3 class="text-2xl font-black text-slate-800 mt-1">${s.count}</h3>
-      </div>
-      <div class="${s.color} text-white p-3.5 rounded-2xl shadow-md">
-        <i data-lucide="${s.icon}" class="w-6 h-6"></i>
-      </div>
-    </div>
-  `).join('');
-}
-
-function switchAdminSheet(sheetName) {
-  activeAdminSheet = sheetName;
-  renderAdminSidebarMenu();
-  renderAdminTable(sheetName);
-}
-
-async function reloadAdminData() {
-  await fetchWebsiteData();
-  renderAdminDashboard();
-}
-
-function renderAdminTable(sheetName) {
-  document.getElementById('admin-table-title').innerText = `Data Sheet: "${sheetName}"`;
-  const thead = document.querySelector('#admin-data-table thead');
-  const tbody = document.getElementById('admin-data-tbody');
-
-  let actualKey = Object.keys(globalData).find(k => k.toLowerCase() === sheetName.toLowerCase());
-  let rows = [];
-  if (actualKey && globalData[actualKey]) {
-    rows = globalData[actualKey];
-  }
-
-  if (sheetName.toLowerCase() === 'setting' && globalData.Setting) {
-    rows = Object.keys(globalData.Setting).map(k => ({ Key: k, Value: globalData.Setting[k] }));
-  }
-
-  if (!Array.isArray(rows)) {
-    rows = rows ? [rows] : [];
-  }
-
-  if (rows.length === 0) {
-    thead.innerHTML = '';
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="100%" class="p-10 text-center text-slate-400">
-          <i data-lucide="folder-open" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i>
-          Belum ada data pada sheet <b>"${sheetName}"</b>.<br>
-          <span class="text-xs text-slate-500 mt-1 inline-block">Klik tombol <b>"Tambah Data Baru"</b> untuk menambahkan entri.</span>
-        </td>
-      </tr>`;
-    if (window.lucide) lucide.createIcons();
-    return;
-  }
-
-  const headers = Object.keys(rows[0]);
-
-  thead.innerHTML = `
-    <tr>
-      <th class="p-3.5 border-b bg-slate-50 text-slate-600 text-left">No</th>
-      ${headers.map(h => `<th class="p-3.5 border-b uppercase text-[11px] font-bold tracking-wider text-slate-600 bg-slate-50 text-left">${h.replace(/_/g, ' ')}</th>`).join('')}
-      <th class="p-3.5 border-b text-center bg-slate-50 text-slate-600">Aksi</th>
-    </tr>
-  `;
-
-  tbody.innerHTML = rows.map((row, idx) => `
-    <tr class="hover:bg-slate-50/80 border-b border-slate-100 transition">
-      <td class="p-3.5 font-mono text-slate-400 font-semibold text-xs">${idx + 1}</td>
-      ${headers.map(h => {
-        let val = row[h] !== undefined && row[h] !== null ? row[h] : '';
-        
-        // Pembersihan otomatis tanggal jika memuat format ISO (huruf 'T')
-        if (typeof val === 'string' && val.includes('T') && !isNaN(Date.parse(val))) {
-          val = val.split('T')[0];
-        }
-
-        // Pemformatan tautan berkas/link
-        if (typeof val === 'string' && (val.startsWith('http://') || val.startsWith('https://'))) {
-          val = `<a href="${val}" target="_blank" class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-200 hover:bg-emerald-100 text-[11px] font-bold inline-flex items-center gap-1 transition"><i data-lucide="external-link" class="w-3 h-3"></i> Lihat Berkas</a>`;
-        }
-        
-        return `<td class="p-3.5 max-w-xs truncate text-slate-700 font-medium text-xs">${val}</td>`;
-      }).join('')}
-      <td class="p-3.5 text-center whitespace-nowrap space-x-1.5">
-        <button onclick="openEditDataModal(${idx})" class="bg-amber-50 text-amber-700 border border-amber-200 p-2 rounded-xl hover:bg-amber-100 transition shadow-sm" title="Edit Data"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-        <button onclick="deleteDataRow('${row.id || row.Key || idx}')" class="bg-rose-50 text-rose-600 border border-rose-200 p-2 rounded-xl hover:bg-rose-100 transition shadow-sm" title="Hapus Data"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-      </td>
-    </tr>
-  `).join('');
-
-  if (window.lucide) lucide.createIcons();
-}
-
-function openAddDataModal() {
-  currentEditingRowId = null;
-  const subtitle = document.getElementById('crud-modal-subtitle');
-  document.getElementById('crud-modal-title').innerText = `Tambah Data Baru (${activeAdminSheet})`;
-  if (subtitle) subtitle.innerText = `Lengkapi kolom di bawah untuk menambahkan data ke sheet ${activeAdminSheet}.`;
-  
-  buildCrudForm({});
-  document.getElementById('crud-modal').classList.remove('hidden');
-}
-
-function openEditDataModal(rowIdx) {
-  let actualKey = Object.keys(globalData).find(k => k.toLowerCase() === activeAdminSheet.toLowerCase());
-  let rows = (actualKey && globalData[actualKey]) ? globalData[actualKey] : [];
-  if (activeAdminSheet.toLowerCase() === 'setting') {
-    rows = Object.keys(globalData.Setting || {}).map(k => ({ Key: k, Value: globalData.Setting[k] }));
-  }
-  const rowData = rows[rowIdx];
-  currentEditingRowId = rowData.id || rowData.Key;
-  
-  const subtitle = document.getElementById('crud-modal-subtitle');
-  document.getElementById('crud-modal-title').innerText = `Edit Data (${activeAdminSheet})`;
-  if (subtitle) subtitle.innerText = `Perbarui rincian data di bawah ini lalu klik simpan.`;
-
-  buildCrudForm(rowData);
-  document.getElementById('crud-modal').classList.remove('hidden');
-}
-
-function closeCrudModal() {
-  document.getElementById('crud-modal').classList.add('hidden');
-}
-
-// Helper Format Ukuran Berkas Otomatis
-function formatFileSize(bytes) {
-  if (!bytes || bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-// Fungsi pembantu untuk menerapkan format teks di dalam Textarea
-function applyTextFormat(fieldKey, command, extraVal = null) {
-  const textarea = document.getElementById(`field-${fieldKey}`);
-  if (!textarea) return;
-
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const selectedText = textarea.value.substring(start, end);
-  let formattedText = '';
-
-  switch (command) {
-    case 'bold':
-      formattedText = `<b>${selectedText || 'Teks Tebal'}</b>`;
-      break;
-    case 'italic':
-      formattedText = `<i>${selectedText || 'Teks Miring'}</i>`;
-      break;
-    case 'underline':
-      formattedText = `<u>${selectedText || 'Teks Garis Bawah'}</u>`;
-      break;
-    case 'color':
-      const colorHex = extraVal || '#000000';
-      formattedText = `<span style="color: ${colorHex};">${selectedText || 'Teks Berwarna'}</span>`;
-      break;
-    case 'rtl':
-      formattedText = `<div dir="rtl" style="text-align: right;">${selectedText || 'Teks RTL / Arab'}</div>`;
-      break;
-    
-    // Bullets dengan Indentasi Rapi (Gantung/Hanging Indent)
-    case 'unordered-list':
-      if (selectedText) {
-        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
-        formattedText = lines.map(line => {
-          const cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
-          return `<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">• ${cleanLine}</p>`;
-        }).join('\n');
-      } else {
-        formattedText = '<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">• Poin 1</p>\n<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">• Poin 2</p>';
-      }
-      break;
-
-    // Numbering dengan Indentasi Rapi (Gantung/Hanging Indent)
-    case 'ordered-list':
-      if (selectedText) {
-        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
-        formattedText = lines.map((line, idx) => {
-          const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
-          return `<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">${idx + 1}. ${cleanLine}</p>`;
-        }).join('\n');
-      } else {
-        formattedText = '<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">1. Baris 1</p>\n<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">2. Baris 2</p>';
-      }
-      break;
-
-    case 'align-left':
-      formattedText = `<p style="text-align: left;">${selectedText || 'Teks Rata Kiri'}</p>`;
-      break;
-    case 'align-center':
-      formattedText = `<p style="text-align: center;">${selectedText || 'Teks Rata Tengah'}</p>`;
-      break;
-    case 'align-right':
-      formattedText = `<p style="text-align: right;">${selectedText || 'Teks Rata Kanan'}</p>`;
-      break;
-    case 'align-justify':
-      formattedText = `<p style="text-align: justify;">${selectedText || 'Teks Rata Kiri Kanan'}</p>`;
-      break;
-    default:
-      return;
-  }
-
-  // Sisipkan teks ke textarea pada posisi kursor/seleksi
-  textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
-  
-  // Kembalikan fokus dan sesuaikan posisi kursor
-  textarea.focus();
-  textarea.setSelectionRange(start, start + formattedText.length);
-}
-
-function buildCrudForm(dataObj = {}) {
-  const container = document.getElementById('crud-form-fields');
-  let actualKey = Object.keys(globalData).find(k => k.toLowerCase() === activeAdminSheet.toLowerCase());
-  let sampleData = (actualKey && globalData[actualKey] && globalData[actualKey][0]) ? globalData[actualKey][0] : {};
-  
-  if (activeAdminSheet.toLowerCase() === 'setting') {
-    sampleData = { Key: '', Value: '' };
-  }
-
-  let keys = Object.keys(sampleData);
-  if (keys.length === 0) {
-    if (activeAdminSheet === 'Profil') sampleData = { id: '', judul: '', tipe: '', isi: '' };
-    else if (activeAdminSheet === 'Struktur Akademik') sampleData = { id: '', nama: '', jabatan: '', foto: '', urutan: '', nidn: '', keterangan: '' };
-    else if (activeAdminSheet === 'Informasi') sampleData = { id: '', judul: '', kategori: '', tanggal: '', isi: '' };
-    else if (activeAdminSheet === 'Prodi') sampleData = { id: '', nama_prodi: '', gelar: '', akreditasi: '', deskripsi: '' };
-    else if (activeAdminSheet === 'Berita') sampleData = { id: '', judul: '', tanggal: '', penulis: '', gambar: '', konten: '' };
-    else if (activeAdminSheet === 'Galeri') sampleData = { id: '', judul: '', kategori: '', gambar: '' };
-    else if (activeAdminSheet === 'Download') sampleData = { id: '', nama_file: '', deskripsi: '', ukuran: '', url_file: '' };
-    else sampleData = { id: '', judul: '', kategori: '', tanggal: '', isi: '', status: '' };
-    
-    keys = Object.keys(sampleData);
-  }
-
-  // --- FIX UTAMA: Pastikan field 'id' SELALU ada saat mode Edit ---
-  const hasIdKey = keys.some(k => k.toLowerCase() === 'id');
-  if (currentEditingRowId && !hasIdKey) {
-    keys.unshift('id'); // Sisipkan kunci 'id' di paling awal array keys
-  }
-
-  container.innerHTML = keys.map(k => {
-    let val = dataObj[k] !== undefined ? dataObj[k] : '';
-    const keyLower = k.toLowerCase();
-    
-    // Jika sedang Edit dan ini adalah field ID, paksa nilai ID lama masuk ke hidden input
-    if (keyLower === 'id' && currentEditingRowId) {
-      val = val || currentEditingRowId;
-      return `<input type="hidden" name="${k}" id="field-${k}" value="${val}">`;
-    }
-
-    const fieldLabel = k.replace(/_/g, ' ').toUpperCase();
-    const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
-    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo') || keyLower.includes('banner');
-    const isFileField = keyLower.includes('url_file') || keyLower.includes('file') || keyLower.includes('berkas') || keyLower.includes('dokumen') || keyLower === 'file_path';
-    const isDateField = keyLower.includes('tanggal') || keyLower.includes('date') || keyLower.includes('tgl');
-    const isReadOnly = (keyLower === 'id' && currentEditingRowId);
-
-    const colSpanClass = (isLongText || isImageField || isFileField) ? 'md:col-span-2' : 'md:col-span-1';
-
-    let inputHtml = '';
-
-    if (isImageField) {
-      inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Unggah Gambar" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
-            <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
-              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-              <span>Pilih & Unggah Gambar</span>
-              <input type="file" accept="image/*" class="hidden" onchange="handleAdminFileUpload(event, 'field-${k}')">
-            </label>
-          </div>
-          ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL Gambar: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
-        </div>
-      `;
-    } else if (isFileField) {
-      inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Unggah Berkas Baru" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
-            <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
-              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-              <span>Pilih & Unggah File</span>
-              <input type="file" accept=".pdf,.docx,.doc,.xlsx,.xls,.zip,.rar,.jpg,.jpeg,.png" class="hidden" onchange="handleAdminFileUpload(event, 'field-${k}')">
-            </label>
-          </div>
-          ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL File: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
-        </div>
-      `;
-    } else if (isLongText) {
-      inputHtml = `
-        <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50 focus-within:ring-2 focus-within:ring-brand-green focus-within:bg-white transition duration-200">
-          <div class="flex flex-wrap items-center gap-1 p-2 bg-slate-100 border-b border-slate-200 text-slate-700">
-            <button type="button" onclick="applyTextFormat('${k}', 'bold')" title="Tebal (Bold)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="bold" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'italic')" title="Miring (Italic)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="italic" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'underline')" title="Garis Bawah (Underline)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="underline" class="w-4 h-4"></i>
-            </button>
-            
-            <label class="p-1.5 hover:bg-slate-200 rounded-lg transition cursor-pointer flex items-center gap-1" title="Pilih Warna Teks">
-              <i data-lucide="palette" class="w-4 h-4"></i>
-              <input type="color" onchange="applyTextFormat('${k}', 'color', this.value)" class="w-4 h-4 p-0 border-0 bg-transparent cursor-pointer">
-            </label>
-
-            <div class="h-4 w-px bg-slate-300 mx-1"></div>
-
-            <button type="button" onclick="applyTextFormat('${k}', 'unordered-list')" title="Bullets" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="list" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'ordered-list')" title="Penomoran" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="list-ordered" class="w-4 h-4"></i>
-            </button>
-
-            <div class="h-4 w-px bg-slate-300 mx-1"></div>
-
-            <button type="button" onclick="applyTextFormat('${k}', 'align-left')" title="Rata Kiri" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-left" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'align-center')" title="Rata Tengah" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-center" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'align-right')" title="Rata Kanan" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-right" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'align-justify')" title="Rata Kiri-Kanan (Justify)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-justify" class="w-4 h-4"></i>
-            </button>
-
-            <div class="h-4 w-px bg-slate-300 mx-1"></div>
-
-            <button type="button" onclick="applyTextFormat('${k}', 'rtl')" title="Teks RTL (Kanan ke Kiri / Arab)" class="p-1.5 hover:bg-slate-200 rounded-lg transition font-bold text-xs">
-              RTL
-            </button>
-          </div>
-          <textarea name="${k}" id="field-${k}" rows="5" placeholder="Masukkan ${fieldLabel.toLowerCase()}..." class="w-full p-3 text-xs outline-none bg-transparent leading-relaxed resize-y border-none">${val}</textarea>
-        </div>
-      `;
-    } else if (isDateField) {
-      let formattedDate = val;
-      if (typeof val === 'string' && val.includes('T')) {
-        formattedDate = val.split('T')[0];
-      }
-      inputHtml = `<input type="date" name="${k}" id="field-${k}" value="${formattedDate}" class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-slate-50/50">`;
-    } else {
-      inputHtml = `<input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="Masukkan ${fieldLabel.toLowerCase()}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-slate-50/50"'}>`;
-    }
-
-    return `
-      <div class="space-y-1.5 ${colSpanClass}">
-        <label class="block text-xs font-bold text-slate-700 tracking-wide flex items-center justify-between">
-          <span>${fieldLabel}</span>
-          ${isReadOnly ? '<span class="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-mono">LOCKED</span>' : ''}
-        </label>
-        ${inputHtml}
-      </div>
-    `;
-  }).join('');
-
-  if (window.lucide) lucide.createIcons();
 }
 
 // Handler Pembacaan Berkas (Bisa membedakan Gambar dan PDF/DOCX)
