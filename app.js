@@ -609,6 +609,93 @@ function renderProfilView() {
   }
 }
 
+function renderStrukturAkademikView() {
+  const container = document.getElementById('main-content');
+  const dataStruktur = globalData['Struktur Akademik'] || [];
+
+  if (dataStruktur.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-16 bg-white rounded-3xl shadow-sm border border-slate-100 max-w-2xl mx-auto my-8">
+        <div class="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-amber-600">
+          <i data-lucide="network" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">Struktur Akademik Belum Tersedia</h3>
+        <p class="text-xs text-slate-500 mt-1">Data sedang disiapkan oleh pengelola lembaga.</p>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  // Asumsi atribut data: nama, jabatan, foto, nidn, urutan
+  const cardsHtml = dataStruktur.map((item, index) => {
+    const foto = item.foto || item.foto_url || item.gambar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
+    const nama = item.nama || item.Nama || 'Pengurus Akademik';
+    const jabatan = item.jabatan || item.Jabatan || 'Staf Akademik';
+    const nidn = item.nidn || item.NIDN || item.nip || '';
+
+    return `
+      <div class="group relative bg-white rounded-2xl border border-slate-200/80 hover:border-amber-400/50 shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between transform hover:-translate-y-1.5">
+        <!-- Top Accent Bar -->
+        <div class="h-2 bg-gradient-to-r from-emerald-800 via-emerald-600 to-amber-400"></div>
+        
+        <div class="p-6 text-center flex-1 flex flex-col items-center">
+          <!-- Frame Foto -->
+          <div class="relative mb-4">
+            <div class="w-28 h-28 md:w-32 md:h-32 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-emerald-600 to-emerald-800 shadow-xl group-hover:scale-105 transition duration-300">
+              <img 
+                src="${foto}" 
+                alt="${nama}" 
+                class="w-full h-full object-cover rounded-full border-2 border-white bg-slate-100"
+                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80';"
+              />
+            </div>
+          </div>
+
+          <!-- Informasi -->
+          <span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold tracking-wide uppercase mb-2 border border-emerald-200/60 shadow-sm">
+            ${jabatan}
+          </span>
+          <h3 class="font-bold text-slate-800 text-base md:text-lg leading-snug group-hover:text-emerald-800 transition mb-1">
+            ${nama}
+          </h3>
+          ${nidn ? `<p class="text-[11px] text-slate-400 font-mono">NIDN/NIP: ${nidn}</p>` : ''}
+        </div>
+
+        <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 text-center">
+          <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Civitas Akademika</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="space-y-10">
+      <!-- Header Section -->
+      <div class="relative bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-950 rounded-3xl p-8 md:p-12 text-white shadow-2xl overflow-hidden border-b-4 border-amber-400">
+        <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 max-w-3xl">
+          <span class="px-3 py-1 bg-amber-400/20 text-amber-300 rounded-full text-xs font-semibold tracking-wider uppercase border border-amber-400/30">
+            Struktur Organisasi
+          </span>
+          <h1 class="text-2xl md:text-4xl font-extrabold mt-3 tracking-tight">
+            Pengelola & Civitas Akademika
+          </h1>
+          <p class="text-xs md:text-sm text-emerald-100/90 mt-2 leading-relaxed">
+            Susunan kepemimpinan dan dosen pengampu dalam menjaga mutu pendidikan serta sanad keilmuan perguruan tinggi.
+          </p>
+        </div>
+      </div>
+
+      <!-- Grid Pengurus -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        ${cardsHtml}
+      </div>
+    </div>
+  `;
+
+  if (window.lucide) lucide.createIcons();
+}
+
 function renderInformasiView() {
   const items = globalData.Informasi || [];
 
