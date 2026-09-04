@@ -31,15 +31,25 @@
 <body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brand-yellow selection:text-brand-dark">
 
   <!-- Splash Screen Loading -->
-  <div id="splash-screen" class="fixed inset-0 z-[100] bg-brand-green flex flex-col items-center justify-center text-white transition-opacity duration-1000">
-    <div class="text-center p-6 space-y-4 animate-pulse">
-      <img id="splash-logo" src="https://lh3.googleusercontent.com/d/1xnFvU-jN1X7t-PaJ3DcmUlRqoGYPEluj" class="w-28 h-28 mx-auto drop-shadow-lg rounded-full bg-white p-2" alt="Logo">
-      <h1 id="splash-title" class="text-3xl md:text-3xl font-arabic tracking-wide text-brand-white">المعهد العالي السلطان ابو المفاخر </h1>
-      <p id="splash-arabic" class="font-bold text-md md:text-2xl text-brand-yellow">MA'HAD ALY SULTAN ABUL MAFAKHIR</p>
-      <p id="splash-tagline" class="text-sm italic opacity-90">Mencetak Kader Ulama Tafaqquh Fiddin</p>
-      <div class="w-12 h-12 border-4 border-brand-yellow border-t-transparent rounded-full animate-spin mx-auto mt-6"></div>
+  <<div id="splash-screen" class="fixed inset-0 z-50 bg-nuGreen flex flex-col items-center justify-center transition-opacity duration-1000 text-white p-4">
+    <div class="animate-pulse mb-8 text-center flex flex-col items-center">
+      
+      <!-- Logo -->
+      <div class="w-28 h-28 rounded-full overflow-hidden mb-2 shadow-1xl flex items-center justify-center bg-white p-1">
+        <img 
+          src="https://images.weserv.nl/?url=drive.google.com/uc?id=18FeftgRuYinK9sd1XBl6-aAP-g6eN09G" 
+          alt="Logo Ma'had Aly SULAMA" 
+          class="w-full h-full object-contain"
+          referrerpolicy="no-referrer"
+        >
+      </div>
+
+      <!-- Tulisan Arab -->
+      <h2 class="text-4xl md:text-4xl font-arabic tracking-wider leading-tight">المعهد العالي السلطان ابو المفاخر</h2>
+      
+      <!-- Tulisan Latin -->
+      <p class="text-2xl md:text-4xl text-kuningMuda mt-4 font-arabic">Ma'had Aly Sultan Abul Mafakhir</p>
     </div>
-  </div>
 
   <!-- Main App Layout (Public Portal) -->
   <div id="app" class="min-h-screen flex flex-col">
