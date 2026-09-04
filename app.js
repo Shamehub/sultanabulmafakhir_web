@@ -637,139 +637,109 @@ function renderStrukturAkademikView() {
     return;
   }
 
-  // Normalisasi data & urutkan berdasarkan kolom urutan
   const items = rawData.map(item => ({
-    nama: item.nama || item.Nama || 'Pengurus Akademik',
-    jabatan: item.jabatan || item.Jabatan || 'Staf / Pengampu',
-    foto: item.foto || item.Foto || '',
-    nidn: item.nidn || item.NIDN || item.nip || '',
-    keterangan: item.keterangan || item.Keterangan || '',
+    nama: item.nama || item.Nama || item.NAMA || 'Pengurus Akademik',
+    jabatan: item.jabatan || item.Jabatan || item.JABATAN || 'Staf / Pengampu',
+    foto: item.foto || item.Foto || item.gambar || item.Gambar || '',
+    nidn: item.nidn || item.NIDN || item.nip || item.NIP || '',
+    keterangan: item.keterangan || item.Keterangan || item.deskripsi || '',
     urutan: Number(item.urutan || item.Urutan || 99)
-  })).sort((a, b) => a.urutan - b.urutan);
+  }));
+
+  items.sort((a, b) => a.urutan - b.urutan);
 
   const topLeader = items[0];
-  const subordinates = items.slice(1);
+  const otherMembers = items.slice(1);
   const fallbackAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80';
 
-  // Card Generator untuk Bagan (Tambahkan atribut onclick & cursor-pointer)
-  const createNodeCard = (person, isTop = false, index = 0) => {
-    const jsonString = JSON.stringify(person).replace(/"/g, '&quot;');
-    return `
-      <div class="relative flex flex-col items-center group">
-        <div 
-          onclick="openProfileModal(${jsonString})"
-          class="w-64 md:w-72 bg-white rounded-2xl border-2 ${isTop ? 'border-amber-400 shadow-xl' : 'border-emerald-700/30 shadow-md'} hover:shadow-2xl hover:border-amber-500 transition-all duration-300 overflow-hidden relative z-10 cursor-pointer transform hover:-translate-y-1"
-        >
-          <div class="h-2 ${isTop ? 'bg-gradient-to-r from-amber-400 via-emerald-600 to-amber-500' : 'bg-emerald-800'}"></div>
-          <div class="p-5 text-center flex flex-col items-center">
-            <div class="relative mb-3">
-              <div class="w-20 h-20 rounded-full p-1 ${isTop ? 'bg-gradient-to-tr from-amber-400 to-emerald-700' : 'bg-emerald-100'} shadow-md">
-                <img 
-                  src="${person.foto || fallbackAvatar}" 
-                  alt="${person.nama}" 
-                  class="w-full h-full object-cover rounded-full bg-slate-100 border border-white"
-                  onerror="this.onerror=null; this.src='${fallbackAvatar}';"
-                />
-              </div>
-              ${isTop ? `
-                <span class="absolute -bottom-1 -right-1 bg-amber-400 text-slate-900 p-1 rounded-full shadow border border-white">
-                  <i data-lucide="crown" class="w-3.5 h-3.5"></i>
-                </span>
-              ` : ''}
-            </div>
-
-            <span class="inline-block px-3 py-0.5 rounded-full ${isTop ? 'bg-amber-100 text-amber-900 font-extrabold' : 'bg-emerald-50 text-emerald-800 font-bold'} text-[10px] tracking-wider uppercase mb-1 border border-amber-200">
-              ${person.jabatan}
-            </span>
-
-            <h4 class="font-bold text-slate-800 text-sm md:text-base leading-snug group-hover:text-emerald-800 transition">
-              ${person.nama}
-            </h4>
-
-            ${person.nidn ? `<p class="text-[10px] text-slate-400 font-mono mt-1">NIDN: ${person.nidn}</p>` : ''}
-            
-            <span class="text-[10px] font-semibold text-emerald-600 mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <i data-lucide="maximize-2" class="w-3 h-3"></i> Klik untuk detail
-            </span>
+  const topLeaderHtml = `
+    <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 rounded-3xl p-8 text-white shadow-2xl border border-emerald-700/50 relative overflow-hidden mb-10">
+      <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+        <div class="relative shrink-0">
+          <div class="w-36 h-36 md:w-44 md:h-44 rounded-full p-1.5 bg-gradient-to-tr from-amber-400 via-amber-200 to-emerald-400 shadow-2xl">
+            <img 
+              src="${topLeader.foto || fallbackAvatar}" 
+              alt="${topLeader.nama}" 
+              class="w-full h-full object-cover rounded-full bg-slate-900 border-2 border-white/20"
+              onerror="this.onerror=null; this.src='${fallbackAvatar}';"
+            />
           </div>
+          <span class="absolute bottom-1 right-1 bg-amber-400 text-slate-950 p-2 rounded-full shadow-lg border-2 border-emerald-900">
+            <i data-lucide="award" class="w-5 h-5"></i>
+          </span>
+        </div>
+        <div class="text-center md:text-left space-y-2">
+          <span class="inline-block px-3 py-1 bg-amber-400/20 text-amber-300 rounded-full text-xs font-bold tracking-wider uppercase border border-amber-400/30">
+            ${topLeader.jabatan}
+          </span>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">${topLeader.nama}</h2>
+          ${topLeader.nidn ? `<p class="text-xs font-mono text-emerald-200/80">NIDN / NIP: ${topLeader.nidn}</p>` : ''}
+          ${topLeader.keterangan ? `<p class="text-xs md:text-sm text-emerald-100/90 leading-relaxed pt-2 max-w-2xl">${topLeader.keterangan}</p>` : ''}
         </div>
       </div>
-    `;
-  };
+    </div>
+  `;
+
+  const memberCardsHtml = otherMembers.map(m => `
+    <div class="group bg-white rounded-2xl border border-slate-200/80 hover:border-amber-400/60 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between transform hover:-translate-y-1">
+      <div class="h-1.5 bg-gradient-to-r from-emerald-800 via-emerald-600 to-amber-400"></div>
+      <div class="p-6 text-center flex-1 flex flex-col items-center">
+        <div class="w-24 h-24 md:w-28 md:h-28 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-emerald-600 to-emerald-800 shadow-md mb-4 group-hover:scale-105 transition duration-300">
+          <img 
+            src="${m.foto || fallbackAvatar}" 
+            alt="${m.nama}" 
+            class="w-full h-full object-cover rounded-full bg-slate-100 border-2 border-white"
+            onerror="this.onerror=null; this.src='${fallbackAvatar}';"
+          />
+        </div>
+        <span class="inline-block px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold tracking-wide uppercase mb-2 border border-emerald-200/60">
+          ${m.jabatan}
+        </span>
+        <h3 class="font-bold text-slate-800 text-sm md:text-base group-hover:text-emerald-800 transition leading-snug">
+          ${m.nama}
+        </h3>
+        ${m.nidn ? `<p class="text-[11px] text-slate-400 font-mono mt-1">NIDN: ${m.nidn}</p>` : ''}
+        ${m.keterangan ? `<p class="text-xs text-slate-500 mt-2 line-clamp-2">${m.keterangan}</p>` : ''}
+      </div>
+      <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-100 text-center">
+        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Civitas Akademika</span>
+      </div>
+    </div>
+  `).join('');
 
   container.innerHTML = `
-    <div class="max-w-6xl mx-auto space-y-8 pb-12">
-      <!-- Header -->
+    <div class="max-w-6xl mx-auto space-y-8">
       <div>
         <button onclick="navigate('/profil')" class="text-xs font-semibold text-emerald-700 flex items-center gap-1 hover:underline mb-3">
           <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Profil Lembaga
         </button>
         <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200 pb-5 gap-4">
           <div>
-            <span class="text-xs font-bold text-amber-600 uppercase tracking-widest">Bagan Organisasi</span>
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-widest">Struktur Organisasi</span>
             <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mt-1">
               Struktur Akademik & Pengelola
             </h1>
           </div>
           <p class="text-xs text-slate-500 max-w-md">
-            Klik pada salah satu kartu pengurus untuk melihat detail profil dan foto ukuran penuh.
+            Susunan pimpinan, dewan kiai, serta dosen pengampu perguruan tinggi.
           </p>
         </div>
       </div>
 
-      <!-- Container Bagan Struktur -->
-      <div class="bg-slate-50/60 border border-slate-200/80 rounded-3xl p-6 md:p-12 overflow-x-auto">
-        <div class="min-w-[650px] flex flex-col items-center">
-          
-          <!-- LEVEL 1: Pimpinan Utama -->
-          <div class="flex justify-center">
-            ${createNodeCard(topLeader, true, 0)}
+      ${topLeaderHtml}
+
+      ${otherMembers.length > 0 ? `
+        <div class="space-y-4">
+          <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i data-lucide="users" class="w-5 h-5 text-emerald-700"></i>
+            Pengurus & Dosen Pengampu
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            ${memberCardsHtml}
           </div>
-
-          ${subordinates.length > 0 ? `
-            <div class="w-0.5 h-8 bg-emerald-700/60"></div>
-
-            <div class="relative w-full max-w-3xl flex items-center justify-center">
-              <div class="w-full h-0.5 bg-emerald-700/60"></div>
-            </div>
-
-            <!-- LEVEL 2: Pengurus / Subordinat -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-0 w-full pt-4">
-              ${subordinates.map((sub, idx) => `
-                <div class="flex flex-col items-center relative">
-                  <div class="w-0.5 h-4 bg-emerald-700/60 -mt-4 mb-2"></div>
-                  ${createNodeCard(sub, false, idx + 1)}
-                </div>
-              `).join('')}
-            </div>
-          ` : ''}
-
         </div>
-      </div>
-    </div>
-
-    <!-- Modal Lightbox Profil -->
-    <div id="profile-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-100 transform transition-all relative">
-        
-        <!-- Tombol Tutup -->
-        <button onclick="closeProfileModal()" class="absolute top-3 right-3 z-10 bg-slate-900/50 hover:bg-slate-900 text-white rounded-full p-2 transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-
-        <!-- Container Foto Penuh -->
-        <div class="w-full h-80 bg-slate-900 relative">
-          <img id="modal-img" src="" alt="" class="w-full h-full object-contain" />
-        </div>
-
-        <!-- Detail Informasi -->
-        <div class="p-6 text-center space-y-3">
-          <span id="modal-jabatan" class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold uppercase tracking-wider"></span>
-          <h3 id="modal-nama" class="text-xl font-extrabold text-slate-900 leading-snug"></h3>
-          <p id="modal-nidn" class="text-xs text-slate-400 font-mono"></p>
-          <p id="modal-ket" class="text-xs text-slate-600 leading-relaxed pt-2 border-t border-slate-100 hidden"></p>
-        </div>
-      </div>
+      ` : ''}
     </div>
   `;
 
