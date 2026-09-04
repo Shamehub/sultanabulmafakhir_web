@@ -2500,3 +2500,54 @@ function initRichTextEditor(selectorId, initialContent = '') {
 function getEditorContent() {
   return quillEditor ? quillEditor.root.innerHTML : '';
 }
+
+const waBtn = document.getElementById('floating-wa');
+  let isDragging = false;
+  let offset = [0, 0];
+
+  function startDrag(e) {
+    isDragging = false;
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+    
+    offset = [
+      waBtn.offsetLeft - clientX,
+      waBtn.offsetTop - clientY
+    ];
+
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+  }
+
+  function onDrag(e) {
+    isDragging = true;
+    if (e.cancelable) e.preventDefault();
+    
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+    waBtn.style.left = (clientX + offset[0]) + 'px';
+    waBtn.style.top = (clientY + offset[1]) + 'px';
+    waBtn.style.bottom = 'auto';
+    waBtn.style.right = 'auto';
+  }
+
+  function stopDrag(e) {
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('touchend', stopDrag);
+  }
+
+  waBtn.addEventListener('mousedown', startDrag);
+  waBtn.addEventListener('touchstart', startDrag);
+
+  // Mencegah klik terpicu saat tombol hanya sekadar digeser (drag)
+  waBtn.addEventListener('click', (e) => {
+    if (isDragging) {
+      e.preventDefault();
+      isDragging = false;
+    }
+  });
