@@ -1824,26 +1824,29 @@ function applyTextFormat(fieldKey, command, extraVal = null) {
       formattedText = `<div dir="rtl" style="text-align: right;">${selectedText || 'Teks RTL / Arab'}</div>`;
       break;
     
-    // Perbaikan Logika Bullets untuk Textarea
+    // Bullets dengan Indentasi Rapi (Gantung)
     case 'unordered-list':
       if (selectedText) {
-        const lines = selectedText.split('\n');
-        formattedText = lines.map(line => line.trim().startsWith('•') ? line : `• ${line}`).join('\n');
+        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
+        formattedText = lines.map(line => {
+          const cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
+          return `<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• ${cleanLine}</p>`;
+        }).join('\n');
       } else {
-        formattedText = '• Poin 1\n• Poin 2';
+        formattedText = '<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 1</p>\n<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 2</p>';
       }
       break;
 
-    // Perbaikan Logika Numbering untuk Textarea
+    // Numbering dengan Indentasi Rapi (Gantung)
     case 'ordered-list':
       if (selectedText) {
-        const lines = selectedText.split('\n');
+        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
         formattedText = lines.map((line, idx) => {
-          const cleanLine = line.replace(/^\d+\.\s*/, '');
-          return `${idx + 1}. ${cleanLine}`;
+          const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
+          return `<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">${idx + 1}. ${cleanLine}</p>`;
         }).join('\n');
       } else {
-        formattedText = '1. Baris 1\n2. Baris 2';
+        formattedText = '<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">1. Baris 1</p>\n<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">2. Baris 2</p>';
       }
       break;
 
@@ -1869,154 +1872,6 @@ function applyTextFormat(fieldKey, command, extraVal = null) {
   // Kembalikan fokus dan sesuaikan posisi kursor
   textarea.focus();
   textarea.setSelectionRange(start, start + formattedText.length);
-}
-
-function buildCrudForm(dataObj = {}) {
-  const container = document.getElementById('crud-form-fields');
-  let actualKey = Object.keys(globalData).find(k => k.toLowerCase() === activeAdminSheet.toLowerCase());
-  let sampleData = (actualKey && globalData[actualKey] && globalData[actualKey][0]) ? globalData[actualKey][0] : {};
-  
-  if (activeAdminSheet.toLowerCase() === 'setting') {
-    sampleData = { Key: '', Value: '' };
-  }
-
-  let keys = Object.keys(sampleData);
-  if (keys.length === 0) {
-    if (activeAdminSheet === 'Profil') sampleData = { judul: '', tipe: '', isi: '' };
-    else if (activeAdminSheet === 'Informasi') sampleData = { judul: '', kategori: '', tanggal: '', isi: '' };
-    else if (activeAdminSheet === 'Prodi') sampleData = { nama_prodi: '', gelar: '', akreditasi: '', deskripsi: '' };
-    else if (activeAdminSheet === 'Berita') sampleData = { judul: '', tanggal: '', penulis: '', gambar: '', konten: '' };
-    else if (activeAdminSheet === 'Galeri') sampleData = { judul: '', kategori: '', gambar: '' };
-    else if (activeAdminSheet === 'Download') sampleData = { nama_file: '', deskripsi: '', ukuran: '', url_file: '' };
-    else sampleData = { id: '', judul: '', kategori: '', tanggal: '', isi: '', status: '' };
-    
-    keys = Object.keys(sampleData);
-  }
-
-  container.innerHTML = keys.map(k => {
-    let val = dataObj[k] !== undefined ? dataObj[k] : '';
-    const keyLower = k.toLowerCase();
-    
-    if (keyLower === 'id' && currentEditingRowId) {
-      return `<input type="hidden" name="${k}" id="field-${k}" value="${val}">`;
-    }
-
-    const fieldLabel = k.replace(/_/g, ' ').toUpperCase();
-    const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
-    const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo') || keyLower.includes('banner');
-    const isFileField = keyLower.includes('url_file') || keyLower.includes('file') || keyLower.includes('berkas') || keyLower.includes('dokumen') || keyLower === 'file_path';
-    const isDateField = keyLower.includes('tanggal') || keyLower.includes('date') || keyLower.includes('tgl');
-    const isReadOnly = (keyLower === 'id' && currentEditingRowId);
-
-    const colSpanClass = (isLongText || isImageField || isFileField) ? 'md:col-span-2' : 'md:col-span-1';
-
-    let inputHtml = '';
-
-    if (isImageField) {
-      inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Unggah Gambar" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
-            <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
-              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-              <span>Pilih & Unggah Gambar</span>
-              <input type="file" accept="image/*" class="hidden" onchange="handleAdminFileUpload(event, 'field-${k}')">
-            </label>
-          </div>
-          ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL Gambar: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
-        </div>
-      `;
-    } else if (isFileField) {
-      inputHtml = `
-        <div class="space-y-2 bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="https://... atau Unggah Berkas Baru" class="flex-1 border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-white font-mono">
-            <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
-              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-              <span>Pilih & Unggah File</span>
-              <input type="file" accept=".pdf,.docx,.doc,.xlsx,.xls,.zip,.rar,.jpg,.jpeg,.png" class="hidden" onchange="handleAdminFileUpload(event, 'field-${k}')">
-            </label>
-          </div>
-          ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL File: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
-        </div>
-      `;
-    } else if (isLongText) {
-      inputHtml = `
-        <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50 focus-within:ring-2 focus-within:ring-brand-green focus-within:bg-white transition duration-200">
-          <!-- Toolbar Formatting -->
-          <div class="flex flex-wrap items-center gap-1 p-2 bg-slate-100 border-b border-slate-200 text-slate-700">
-            <button type="button" onclick="applyTextFormat('${k}', 'bold')" title="Tebal (Bold)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="bold" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'italic')" title="Miring (Italic)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="italic" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'underline')" title="Garis Bawah (Underline)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="underline" class="w-4 h-4"></i>
-            </button>
-            
-            <!-- Color Picker -->
-            <label class="p-1.5 hover:bg-slate-200 rounded-lg transition cursor-pointer flex items-center gap-1" title="Pilih Warna Teks">
-              <i data-lucide="palette" class="w-4 h-4"></i>
-              <input type="color" onchange="applyTextFormat('${k}', 'color', this.value)" class="w-4 h-4 p-0 border-0 bg-transparent cursor-pointer">
-            </label>
-
-            <div class="h-4 w-px bg-slate-300 mx-1"></div>
-
-            <button type="button" onclick="applyTextFormat('${k}', 'unordered-list')" title="Bullets" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="list" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'ordered-list')" title="Penomoran" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="list-ordered" class="w-4 h-4"></i>
-            </button>
-
-            <div class="h-4 w-px bg-slate-300 mx-1"></div>
-
-            <button type="button" onclick="applyTextFormat('${k}', 'align-left')" title="Rata Kiri" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-left" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'align-center')" title="Rata Tengah" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-center" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'align-right')" title="Rata Kanan" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-right" class="w-4 h-4"></i>
-            </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'align-justify')" title="Rata Kiri-Kanan (Justify)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
-              <i data-lucide="align-justify" class="w-4 h-4"></i>
-            </button>
-
-            <div class="h-4 w-px bg-slate-300 mx-1"></div>
-
-            <button type="button" onclick="applyTextFormat('${k}', 'rtl')" title="Teks RTL (Kanan ke Kiri / Arab)" class="p-1.5 hover:bg-slate-200 rounded-lg transition font-bold text-xs">
-              RTL
-            </button>
-          </div>
-          <!-- Textarea -->
-          <textarea name="${k}" id="field-${k}" rows="5" placeholder="Masukkan ${fieldLabel.toLowerCase()}..." class="w-full p-3 text-xs outline-none bg-transparent leading-relaxed resize-y border-none">${val}</textarea>
-        </div>
-      `;
-    } else if (isDateField) {
-      let formattedDate = val;
-      if (typeof val === 'string' && val.includes('T')) {
-        formattedDate = val.split('T')[0];
-      }
-      inputHtml = `<input type="date" name="${k}" id="field-${k}" value="${formattedDate}" class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-slate-50/50">`;
-    } else {
-      inputHtml = `<input type="text" name="${k}" id="field-${k}" value="${val}" placeholder="Masukkan ${fieldLabel.toLowerCase()}..." ${isReadOnly ? 'readonly class="w-full border border-slate-200 rounded-xl p-3 text-xs bg-slate-100 text-slate-400 font-mono cursor-not-allowed"' : 'class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-green outline-none bg-slate-50/50"'}>`;
-    }
-
-    return `
-      <div class="space-y-1.5 ${colSpanClass}">
-        <label class="block text-xs font-bold text-slate-700 tracking-wide flex items-center justify-between">
-          <span>${fieldLabel}</span>
-          ${isReadOnly ? '<span class="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-mono">LOCKED</span>' : ''}
-        </label>
-        ${inputHtml}
-      </div>
-    `;
-  }).join('');
-
-  if (window.lucide) lucide.createIcons();
 }
 
 // Handler Pembacaan Berkas (Bisa membedakan Gambar dan PDF/DOCX)
