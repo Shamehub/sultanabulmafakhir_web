@@ -180,6 +180,14 @@ function renderBerandaView() {
     return `https://lh3.googleusercontent.com/d/${urlOrId}`;
   };
 
+  // Helper untuk membersihkan HTML tag jika ada
+  const stripHtml = (html) => {
+    if (!html) return '';
+    const tmp = document.createElement('DIV');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
+
   // Helper untuk mengambil data terbaru (Reverse array tanpa mengubah array aslinya)
   const getLatestData = (arr = []) => {
     return [...arr].reverse();
@@ -229,7 +237,7 @@ function renderBerandaView() {
         </div>
       </div>
 
-      <!-- TENTANG INSTITUSI -->
+      <!-- TENTANG INSTITUSI (Di-clamp 4-5 Baris) -->
       <div onclick="navigate('/profil')" class="group relative bg-amber-100/40 hover:bg-amber-100/70 rounded-3xl p-6 md:p-8 border border-amber-200/80 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden">
         <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-emerald-600 to-emerald-800"></div>
         <div class="flex justify-between items-center border-b border-amber-200/60 pb-4 mb-4">
@@ -244,8 +252,8 @@ function renderBerandaView() {
             <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
           </div>
         </div>
-        <p class="text-slate-700 text-xs md:text-sm leading-relaxed whitespace-pre-line line-clamp-3">
-          ${globalData.Setting?.sejarah_singkat || globalData.Setting?.tagline || "Ma'had Aly Sultan Abul Mafakhir merupakan perguruan tinggi keagamaan Islam berbasis pesantren yang berfokus pada pendalaman ilmu-ilmu keislaman (Tafaqquh Fiddin)."}
+        <p class="text-slate-700 text-xs md:text-sm leading-relaxed line-clamp-5">
+          ${stripHtml(globalData.Setting?.sejarah_singkat || globalData.Setting?.tagline || "Ma'had Aly Sultan Abul Mafakhir merupakan perguruan tinggi keagamaan Islam berbasis pesantren yang berfokus pada pendalaman ilmu-ilmu keislaman (Tafaqquh Fiddin).")}
         </p>
       </div>
 
@@ -276,7 +284,7 @@ function renderBerandaView() {
                   </div>
                 </div>
                 <h4 class="font-bold text-base md:text-lg text-slate-800 group-hover:text-emerald-800 transition-colors leading-snug mb-2">${p.nama_prodi}</h4>
-                <p class="text-xs text-slate-700 line-clamp-3 leading-relaxed mb-4">${p.deskripsi || 'Program studi unggulan berbasis pendalaman kitab kuning dan hukum Islam.'}</p>
+                <p class="text-xs text-slate-700 line-clamp-5 leading-relaxed mb-4">${stripHtml(p.deskripsi || 'Program studi unggulan berbasis pendalaman kitab kuning dan hukum Islam.')}</p>
               </div>
               <div class="pt-3 border-t border-amber-200/60 flex items-center justify-between text-xs font-semibold text-emerald-800">
                 <span>Pelajari Kurikulum</span>
@@ -313,7 +321,7 @@ function renderBerandaView() {
                   </span>
                 </div>
                 <h4 class="font-bold text-slate-800 text-base leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2">${inf.judul}</h4>
-                <p class="text-xs text-slate-700 line-clamp-3 leading-relaxed">${inf.isi || inf.deskripsi || ''}</p>
+                <p class="text-xs text-slate-700 line-clamp-5 leading-relaxed">${stripHtml(inf.isi || inf.deskripsi || '')}</p>
               </div>
               <div class="pt-4 mt-4 border-t border-amber-200/60 flex items-center justify-between text-xs font-semibold text-emerald-800">
                 <span>Baca Pengumuman</span>
@@ -349,8 +357,9 @@ function renderBerandaView() {
                     <i data-lucide="calendar" class="w-3 h-3 text-amber-400"></i> ${formatDateIndo(b.tanggal)}
                   </div>
                 </div>
-                <div class="p-5">
-                  <h4 class="font-bold text-slate-800 text-base leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2 mb-2">${b.judul}</h4>
+                <div class="p-5 space-y-2">
+                  <h4 class="font-bold text-slate-800 text-base leading-snug group-hover:text-emerald-800 transition-colors line-clamp-2">${b.judul}</h4>
+                  <p class="text-xs text-slate-700 line-clamp-5 leading-relaxed">${stripHtml(b.konten || b.isi || b.deskripsi || '')}</p>
                 </div>
               </div>
               <div class="px-5 pb-5 pt-0 flex items-center justify-between text-xs font-semibold text-emerald-800">
@@ -416,7 +425,7 @@ function renderBerandaView() {
               <div class="bg-amber-100/40 rounded-2xl p-4 border border-amber-200/80 shadow-sm hover:shadow-md transition flex items-center justify-between gap-3 group">
                 <div class="min-w-0 space-y-0.5">
                   <h4 class="font-bold text-xs text-slate-800 truncate group-hover:text-emerald-800 transition-colors">${d.nama_file || 'Berkas Dokumen'}</h4>
-                  <p class="text-[11px] text-slate-600 truncate">${d.deskripsi || 'Dokumen Resmi'}</p>
+                  <p class="text-[11px] text-slate-600 line-clamp-2">${stripHtml(d.deskripsi || 'Dokumen Resmi')}</p>
                 </div>
                 <a href="${d.url_file || '#'}" target="_blank" class="shrink-0 bg-amber-200/80 text-emerald-950 hover:bg-emerald-700 hover:text-white p-2.5 rounded-xl transition duration-200 text-xs font-semibold flex items-center justify-center border border-amber-300/50">
                   <i data-lucide="download" class="w-4 h-4"></i>
