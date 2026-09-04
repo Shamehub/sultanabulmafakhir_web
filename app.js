@@ -1833,7 +1833,7 @@ function applyTextFormat(fieldKey, command, extraVal = null) {
           return `<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">• ${cleanLine}</p>`;
         }).join('\n');
       } else {
-        formattedText = '<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">• Poin 1</p>\n<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 2</p>';
+        formattedText = '<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">• Poin 1</p>\n<p style="padding-left: 1.0em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 2</p>';
       }
       break;
 
@@ -1846,7 +1846,7 @@ function applyTextFormat(fieldKey, command, extraVal = null) {
           return `<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">${idx + 1}. ${cleanLine}</p>`;
         }).join('\n');
       } else {
-        formattedText = '<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">1. Baris 1</p>\n<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">2. Baris 2</p>';
+        formattedText = '<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">1. Baris 1</p>\n<p style="padding-left: 1.0em; text-indent: -1.5em; margin-bottom: 0.5em;">2. Baris 2</p>';
       }
       break;
 
