@@ -1796,8 +1796,8 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Fungsi pembantu untuk menerapkan format teks (Tebal, Miring, Garis Bawah, Bullets, Penomoran, & Perataan Teks)
-function applyTextFormat(fieldKey, command) {
+// Fungsi pembantu untuk menerapkan format teks (Tebal, Miring, Garis Bawah, Bullets, Penomoran, Perataan, Warna, & RTL)
+function applyTextFormat(fieldKey, command, extraVal = null) {
   const textarea = document.getElementById(`field-${fieldKey}`);
   if (!textarea) return;
 
@@ -1815,6 +1815,13 @@ function applyTextFormat(fieldKey, command) {
       break;
     case 'underline':
       formattedText = `<u>${selectedText || 'Teks Garis Bawah'}</u>`;
+      break;
+    case 'color':
+      const colorHex = extraVal || '#000000';
+      formattedText = `<span style="color: ${colorHex};">${selectedText || 'Teks Berwarna'}</span>`;
+      break;
+    case 'rtl':
+      formattedText = `<div dir="rtl" style="text-align: right;">${selectedText || 'Teks RTL / Arab'}</div>`;
       break;
     case 'unordered-list':
       if (selectedText) {
@@ -1939,14 +1946,24 @@ function buildCrudForm(dataObj = {}) {
             <button type="button" onclick="applyTextFormat('${k}', 'underline')" title="Garis Bawah (Underline)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
               <i data-lucide="underline" class="w-4 h-4"></i>
             </button>
+            
+            <!-- Color Picker -->
+            <label class="p-1.5 hover:bg-slate-200 rounded-lg transition cursor-pointer flex items-center gap-1" title="Pilih Warna Teks">
+              <i data-lucide="palette" class="w-4 h-4"></i>
+              <input type="color" onchange="applyTextFormat('${k}', 'color', this.value)" class="w-4 h-4 p-0 border-0 bg-transparent cursor-pointer">
+            </label>
+
             <div class="h-4 w-px bg-slate-300 mx-1"></div>
+
             <button type="button" onclick="applyTextFormat('${k}', 'unordered-list')" title="Bullets (Unordered List)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
               <i data-lucide="list" class="w-4 h-4"></i>
             </button>
             <button type="button" onclick="applyTextFormat('${k}', 'ordered-list')" title="Penomoran (Numbered List)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
               <i data-lucide="list-ordered" class="w-4 h-4"></i>
             </button>
+
             <div class="h-4 w-px bg-slate-300 mx-1"></div>
+
             <button type="button" onclick="applyTextFormat('${k}', 'align-left')" title="Rata Kiri" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
               <i data-lucide="align-left" class="w-4 h-4"></i>
             </button>
@@ -1958,6 +1975,13 @@ function buildCrudForm(dataObj = {}) {
             </button>
             <button type="button" onclick="applyTextFormat('${k}', 'align-justify')" title="Rata Kiri-Kanan (Justify)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
               <i data-lucide="align-justify" class="w-4 h-4"></i>
+            </button>
+
+            <div class="h-4 w-px bg-slate-300 mx-1"></div>
+
+            <!-- RTL Button (Cocok untuk Teks Arab / Kanan ke Kiri) -->
+            <button type="button" onclick="applyTextFormat('${k}', 'rtl')" title="Teks RTL (Kanan ke Kiri / Arab)" class="p-1.5 hover:bg-slate-200 rounded-lg transition font-bold text-xs">
+              RTL
             </button>
           </div>
           <!-- Textarea -->
