@@ -1796,7 +1796,7 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Fungsi pembantu untuk menerapkan format teks (Tebal, Miring, Garis Bawah, Bullets, Penomoran, Perataan, Warna, & RTL)
+// Fungsi pembantu untuk menerapkan format teks di dalam Textarea
 function applyTextFormat(fieldKey, command, extraVal = null) {
   const textarea = document.getElementById(`field-${fieldKey}`);
   if (!textarea) return;
@@ -1823,22 +1823,30 @@ function applyTextFormat(fieldKey, command, extraVal = null) {
     case 'rtl':
       formattedText = `<div dir="rtl" style="text-align: right;">${selectedText || 'Teks RTL / Arab'}</div>`;
       break;
+    
+    // Perbaikan Logika Bullets untuk Textarea
     case 'unordered-list':
       if (selectedText) {
         const lines = selectedText.split('\n');
-        formattedText = '<ul>\n' + lines.map(line => `  <li>${line}</li>`).join('\n') + '\n</ul>';
+        formattedText = lines.map(line => line.trim().startsWith('•') ? line : `• ${line}`).join('\n');
       } else {
-        formattedText = '<ul>\n  <li>Poin 1</li>\n  <li>Poin 2</li>\n</ul>';
+        formattedText = '• Poin 1\n• Poin 2';
       }
       break;
+
+    // Perbaikan Logika Numbering untuk Textarea
     case 'ordered-list':
       if (selectedText) {
         const lines = selectedText.split('\n');
-        formattedText = '<ol>\n' + lines.map(line => `  <li>${line}</li>`).join('\n') + '\n</ol>';
+        formattedText = lines.map((line, idx) => {
+          const cleanLine = line.replace(/^\d+\.\s*/, '');
+          return `${idx + 1}. ${cleanLine}`;
+        }).join('\n');
       } else {
-        formattedText = '<ol>\n  <li>Item 1</li>\n  <li>Item 2</li>\n</ol>';
+        formattedText = '1. Baris 1\n2. Baris 2';
       }
       break;
+
     case 'align-left':
       formattedText = `<p style="text-align: left;">${selectedText || 'Teks Rata Kiri'}</p>`;
       break;
@@ -1855,10 +1863,10 @@ function applyTextFormat(fieldKey, command, extraVal = null) {
       return;
   }
 
-  // Sisipkan teks yang diformat ke posisi kursor/seleksi
+  // Sisipkan teks ke textarea pada posisi kursor/seleksi
   textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
   
-  // Perbarui posisi kursor setelah format diterapkan
+  // Kembalikan fokus dan sesuaikan posisi kursor
   textarea.focus();
   textarea.setSelectionRange(start, start + formattedText.length);
 }
@@ -1955,10 +1963,10 @@ function buildCrudForm(dataObj = {}) {
 
             <div class="h-4 w-px bg-slate-300 mx-1"></div>
 
-            <button type="button" onclick="applyTextFormat('${k}', 'unordered-list')" title="Bullets (Unordered List)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
+            <button type="button" onclick="applyTextFormat('${k}', 'unordered-list')" title="Bullets" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
               <i data-lucide="list" class="w-4 h-4"></i>
             </button>
-            <button type="button" onclick="applyTextFormat('${k}', 'ordered-list')" title="Penomoran (Numbered List)" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
+            <button type="button" onclick="applyTextFormat('${k}', 'ordered-list')" title="Penomoran" class="p-1.5 hover:bg-slate-200 rounded-lg transition">
               <i data-lucide="list-ordered" class="w-4 h-4"></i>
             </button>
 
@@ -1979,7 +1987,6 @@ function buildCrudForm(dataObj = {}) {
 
             <div class="h-4 w-px bg-slate-300 mx-1"></div>
 
-            <!-- RTL Button (Cocok untuk Teks Arab / Kanan ke Kiri) -->
             <button type="button" onclick="applyTextFormat('${k}', 'rtl')" title="Teks RTL (Kanan ke Kiri / Arab)" class="p-1.5 hover:bg-slate-200 rounded-lg transition font-bold text-xs">
               RTL
             </button>
