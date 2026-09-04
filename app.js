@@ -2148,7 +2148,7 @@ function buildCrudForm(dataObj = {}) {
             <label class="cursor-pointer bg-brand-green text-white hover:bg-emerald-800 px-4 py-3 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-2 shrink-0">
               <i data-lucide="upload-cloud" class="w-4 h-4"></i>
               <span>Pilih & Unggah Gambar</span>
-              <input type="file" accept="image/*" class="hidden" onchange="handleFileSelect(event, 'field-${k}')">
+              <input type="file" accept="image/*" class="hidden" onchange="handleAdminFileUpload(event, 'field-${k}')">
             </label>
           </div>
           ${val ? `<div class="text-[11px] text-slate-500 truncate mt-1">URL Gambar: <a href="${val}" target="_blank" class="text-emerald-700 font-medium hover:underline">${val}</a></div>` : ''}
