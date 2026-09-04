@@ -1824,26 +1824,27 @@ function applyTextFormat(fieldKey, command, extraVal = null) {
       formattedText = `<div dir="rtl" style="text-align: right;">${selectedText || 'Teks RTL / Arab'}</div>`;
       break;
     
-    // Perbaikan Logika Bullets untuk Textarea
+    // Membungkus dengan HTML tag agar indentasi di frontend otomatis rapi
     case 'unordered-list':
       if (selectedText) {
-        const lines = selectedText.split('\n');
-        formattedText = lines.map(line => line.trim().startsWith('•') ? line : `• ${line}`).join('\n');
+        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
+        const listItems = lines.map(line => `  <li>${line.trim()}</li>`).join('\n');
+        formattedText = `<ul>\n${listItems}\n</ul>`;
       } else {
-        formattedText = '• Poin 1\n• Poin 2';
+        formattedText = '<ul>\n  <li>Poin 1</li>\n  <li>Poin 2</li>\n</ul>';
       }
       break;
 
-    // Perbaikan Logika Numbering untuk Textarea
     case 'ordered-list':
       if (selectedText) {
-        const lines = selectedText.split('\n');
-        formattedText = lines.map((line, idx) => {
-          const cleanLine = line.replace(/^\d+\.\s*/, '');
-          return `${idx + 1}. ${cleanLine}`;
+        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
+        const listItems = lines.map(line => {
+          const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
+          return `  <li>${cleanLine}</li>`;
         }).join('\n');
+        formattedText = `<ol>\n${listItems}\n</ol>`;
       } else {
-        formattedText = '1. Baris 1\n2. Baris 2';
+        formattedText = '<ol>\n  <li>Baris 1</li>\n  <li>Baris 2</li>\n</ol>';
       }
       break;
 
