@@ -1824,26 +1824,29 @@ function applyTextFormat(fieldKey, command, extraVal = null) {
       formattedText = `<div dir="rtl" style="text-align: right;">${selectedText || 'Teks RTL / Arab'}</div>`;
       break;
     
-    // Perbaikan Logika Bullets untuk Textarea
+    // Bullets dengan Indentasi Rapi (Gantung/Hanging Indent)
     case 'unordered-list':
       if (selectedText) {
-        const lines = selectedText.split('\n');
-        formattedText = lines.map(line => line.trim().startsWith('•') ? line : `• ${line}`).join('\n');
+        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
+        formattedText = lines.map(line => {
+          const cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
+          return `<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• ${cleanLine}</p>`;
+        }).join('\n');
       } else {
-        formattedText = '• Poin 1\n• Poin 2';
+        formattedText = '<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 1</p>\n<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 2</p>';
       }
       break;
 
-    // Perbaikan Logika Numbering untuk Textarea
+    // Numbering dengan Indentasi Rapi (Gantung/Hanging Indent)
     case 'ordered-list':
       if (selectedText) {
-        const lines = selectedText.split('\n');
+        const lines = selectedText.split('\n').filter(l => l.trim() !== '');
         formattedText = lines.map((line, idx) => {
-          const cleanLine = line.replace(/^\d+\.\s*/, '');
-          return `${idx + 1}. ${cleanLine}`;
+          const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
+          return `<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">${idx + 1}. ${cleanLine}</p>`;
         }).join('\n');
       } else {
-        formattedText = '1. Baris 1\n2. Baris 2';
+        formattedText = '<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">1. Baris 1</p>\n<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">2. Baris 2</p>';
       }
       break;
 
