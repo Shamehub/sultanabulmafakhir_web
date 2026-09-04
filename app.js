@@ -180,6 +180,11 @@ function renderBerandaView() {
     return `https://lh3.googleusercontent.com/d/${urlOrId}`;
   };
 
+  // Helper untuk mengambil data terbaru (Reverse array tanpa mengubah array aslinya)
+  const getLatestData = (arr = []) => {
+    return [...arr].reverse();
+  };
+
   const heroImageRaw = globalData.Setting?.hero_image || globalData.Setting?.gambar_hero || globalData.Setting?.banner || '';
   const heroImageUrl = getImageUrl(heroImageRaw);
 
@@ -260,7 +265,7 @@ function renderBerandaView() {
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">
-          ${(globalData.Prodi || []).slice(0, 3).map(p => `
+          ${getLatestData(globalData.Prodi).slice(0, 3).map(p => `
             <div onclick="navigate('/prodi/${slugify(p.nama_prodi)}')" class="group bg-amber-100/40 rounded-3xl p-6 border border-amber-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden">
               <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div>
@@ -298,7 +303,7 @@ function renderBerandaView() {
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">
-          ${(globalData.Informasi || []).slice(0, 3).map(inf => `
+          ${getLatestData(globalData.Informasi).slice(0, 3).map(inf => `
             <div onclick="navigate('/informasi/${slugify(inf.judul)}')" class="group bg-amber-100/40 rounded-3xl p-6 border border-amber-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden">
               <div class="space-y-3">
                 <div class="flex justify-between items-center text-xs">
@@ -335,7 +340,7 @@ function renderBerandaView() {
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">
-          ${(globalData.Berita || []).slice(0, 3).map(b => `
+          ${getLatestData(globalData.Berita).slice(0, 3).map(b => `
             <div onclick="navigate('/berita/${slugify(b.judul)}')" class="group bg-amber-100/40 rounded-3xl shadow-sm hover:shadow-xl overflow-hidden border border-amber-200/80 cursor-pointer hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between">
               <div>
                 <div class="relative overflow-hidden h-48 bg-amber-200/40">
@@ -374,7 +379,7 @@ function renderBerandaView() {
           </div>
 
           <div class="grid sm:grid-cols-3 gap-4">
-            ${(globalData.Galeri || []).slice(0, 3).map(g => {
+            ${getLatestData(globalData.Galeri).slice(0, 3).map(g => {
               const imgUrl = g.url || g.gambar || g.url_gambar || g.foto || g.link_gambar || '';
               const fallbackUrl = 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?q=80&w=600&auto=format&fit=crop';
               return `
@@ -391,6 +396,7 @@ function renderBerandaView() {
           </div>
         </div>
 
+        <!-- DOKUMEN / BERKAS TERBARU -->
         <div class="space-y-5">
           <div class="flex justify-between items-end">
             <div>
@@ -406,7 +412,7 @@ function renderBerandaView() {
           </div>
 
           <div class="space-y-3">
-            ${(globalData.Download || []).slice(0, 3).map(d => `
+            ${getLatestData(globalData.Download).slice(0, 3).map(d => `
               <div class="bg-amber-100/40 rounded-2xl p-4 border border-amber-200/80 shadow-sm hover:shadow-md transition flex items-center justify-between gap-3 group">
                 <div class="min-w-0 space-y-0.5">
                   <h4 class="font-bold text-xs text-slate-800 truncate group-hover:text-emerald-800 transition-colors">${d.nama_file || 'Berkas Dokumen'}</h4>
@@ -423,6 +429,8 @@ function renderBerandaView() {
 
     </div>
   `;
+
+  if (window.lucide) lucide.createIcons();
 }
 
 function renderProfilView() {
