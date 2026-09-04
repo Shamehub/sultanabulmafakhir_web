@@ -1805,9 +1805,14 @@ function buildCrudForm(dataObj) {
     const keyLower = k.toLowerCase();
     
     // Deteksi jenis field
+    // Deteksi jenis field secara lebih spesifik
     const isLongText = keyLower.includes('isi') || keyLower.includes('konten') || keyLower.includes('deskripsi') || keyLower.includes('alamat');
     const isImageField = keyLower.includes('gambar') || keyLower.includes('foto') || keyLower.includes('url_gambar') || keyLower.includes('logo');
-    const isFileField = keyLower.includes('url_file') || keyLower.includes('file') || keyLower.includes('berkas') || keyLower.includes('dokumen');
+
+    // Hanya aktifkan input unggah file jika nama key berakhiran atau persis 'url_file', 'file_path', 'berkas', atau 'dokumen'
+    // (Mencegah 'nama_file' berubah jadi file picker)
+    const isFileField = (keyLower.includes('url_file') || keyLower === 'berkas' || keyLower === 'dokumen' || keyLower === 'file_path');
+
     const isDateField = keyLower.includes('tanggal') || keyLower.includes('date');
     const isReadOnly = (k === 'id' && currentEditingRowId);
 
