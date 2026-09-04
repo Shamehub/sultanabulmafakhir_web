@@ -2501,6 +2501,7 @@ function getEditorContent() {
   return quillEditor ? quillEditor.root.innerHTML : '';
 }
 
+// Fungsi untuk menggeser tombol WA
 const waBtn = document.getElementById('floating-wa');
   let isDragging = false;
   let offset = [0, 0];
