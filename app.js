@@ -612,85 +612,134 @@ function renderProfilView() {
 
 function renderStrukturAkademikView() {
   const container = document.getElementById('main-content');
-  const dataStruktur = globalData['Struktur Akademik'] || [];
+  if (!container) return;
 
-  if (dataStruktur.length === 0) {
+  const rawData = globalData['Struktur Akademik'] || globalData['StrukturAkademik'] || [];
+
+  if (!rawData || rawData.length === 0) {
     container.innerHTML = `
-      <div class="text-center py-16 bg-white rounded-3xl shadow-sm border border-slate-100 max-w-2xl mx-auto my-8">
-        <div class="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-amber-600">
-          <i data-lucide="network" class="w-8 h-8"></i>
+      <div class="max-w-4xl mx-auto my-8">
+        <button onclick="navigate('/profil')" class="text-xs font-semibold text-emerald-700 flex items-center gap-1 hover:underline mb-4">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Profil
+        </button>
+        <div class="text-center py-16 bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
+          <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-200/50">
+            <i data-lucide="network" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800">Data Struktur Akademik Belum Tersedia</h3>
+          <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+            Informasi mengenai susunan pimpinan dan civitas akademika sedang diperbarui oleh administrator.
+          </p>
         </div>
-        <h3 class="text-lg font-bold text-slate-800">Struktur Akademik Belum Tersedia</h3>
-        <p class="text-xs text-slate-500 mt-1">Data sedang disiapkan oleh pengelola lembaga.</p>
-      </div>`;
+      </div>
+    `;
     if (window.lucide) lucide.createIcons();
     return;
   }
 
-  // Asumsi atribut data: nama, jabatan, foto, nidn, urutan
-  const cardsHtml = dataStruktur.map((item, index) => {
-    const foto = item.foto || item.foto_url || item.gambar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
-    const nama = item.nama || item.Nama || 'Pengurus Akademik';
-    const jabatan = item.jabatan || item.Jabatan || 'Staf Akademik';
-    const nidn = item.nidn || item.NIDN || item.nip || '';
+  const items = rawData.map(item => ({
+    nama: item.nama || item.Nama || item.NAMA || 'Pengurus Akademik',
+    jabatan: item.jabatan || item.Jabatan || item.JABATAN || 'Staf / Pengampu',
+    foto: item.foto || item.Foto || item.gambar || item.Gambar || '',
+    nidn: item.nidn || item.NIDN || item.nip || item.NIP || '',
+    keterangan: item.keterangan || item.Keterangan || item.deskripsi || '',
+    urutan: Number(item.urutan || item.Urutan || 99)
+  }));
 
-    return `
-      <div class="group relative bg-white rounded-2xl border border-slate-200/80 hover:border-amber-400/50 shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between transform hover:-translate-y-1.5">
-        <!-- Top Accent Bar -->
-        <div class="h-2 bg-gradient-to-r from-emerald-800 via-emerald-600 to-amber-400"></div>
-        
-        <div class="p-6 text-center flex-1 flex flex-col items-center">
-          <!-- Frame Foto -->
-          <div class="relative mb-4">
-            <div class="w-28 h-28 md:w-32 md:h-32 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-emerald-600 to-emerald-800 shadow-xl group-hover:scale-105 transition duration-300">
-              <img 
-                src="${foto}" 
-                alt="${nama}" 
-                class="w-full h-full object-cover rounded-full border-2 border-white bg-slate-100"
-                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80';"
-              />
-            </div>
+  items.sort((a, b) => a.urutan - b.urutan);
+
+  const topLeader = items[0];
+  const otherMembers = items.slice(1);
+  const fallbackAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80';
+
+  const topLeaderHtml = `
+    <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 rounded-3xl p-8 text-white shadow-2xl border border-emerald-700/50 relative overflow-hidden mb-10">
+      <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+        <div class="relative shrink-0">
+          <div class="w-36 h-36 md:w-44 md:h-44 rounded-full p-1.5 bg-gradient-to-tr from-amber-400 via-amber-200 to-emerald-400 shadow-2xl">
+            <img 
+              src="${topLeader.foto || fallbackAvatar}" 
+              alt="${topLeader.nama}" 
+              class="w-full h-full object-cover rounded-full bg-slate-900 border-2 border-white/20"
+              onerror="this.onerror=null; this.src='${fallbackAvatar}';"
+            />
           </div>
-
-          <!-- Informasi -->
-          <span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold tracking-wide uppercase mb-2 border border-emerald-200/60 shadow-sm">
-            ${jabatan}
+          <span class="absolute bottom-1 right-1 bg-amber-400 text-slate-950 p-2 rounded-full shadow-lg border-2 border-emerald-900">
+            <i data-lucide="award" class="w-5 h-5"></i>
           </span>
-          <h3 class="font-bold text-slate-800 text-base md:text-lg leading-snug group-hover:text-emerald-800 transition mb-1">
-            ${nama}
-          </h3>
-          ${nidn ? `<p class="text-[11px] text-slate-400 font-mono">NIDN/NIP: ${nidn}</p>` : ''}
         </div>
-
-        <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 text-center">
-          <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Civitas Akademika</span>
+        <div class="text-center md:text-left space-y-2">
+          <span class="inline-block px-3 py-1 bg-amber-400/20 text-amber-300 rounded-full text-xs font-bold tracking-wider uppercase border border-amber-400/30">
+            ${topLeader.jabatan}
+          </span>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">${topLeader.nama}</h2>
+          ${topLeader.nidn ? `<p class="text-xs font-mono text-emerald-200/80">NIDN / NIP: ${topLeader.nidn}</p>` : ''}
+          ${topLeader.keterangan ? `<p class="text-xs md:text-sm text-emerald-100/90 leading-relaxed pt-2 max-w-2xl">${topLeader.keterangan}</p>` : ''}
         </div>
       </div>
-    `;
-  }).join('');
+    </div>
+  `;
+
+  const memberCardsHtml = otherMembers.map(m => `
+    <div class="group bg-white rounded-2xl border border-slate-200/80 hover:border-amber-400/60 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between transform hover:-translate-y-1">
+      <div class="h-1.5 bg-gradient-to-r from-emerald-800 via-emerald-600 to-amber-400"></div>
+      <div class="p-6 text-center flex-1 flex flex-col items-center">
+        <div class="w-24 h-24 md:w-28 md:h-28 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-emerald-600 to-emerald-800 shadow-md mb-4 group-hover:scale-105 transition duration-300">
+          <img 
+            src="${m.foto || fallbackAvatar}" 
+            alt="${m.nama}" 
+            class="w-full h-full object-cover rounded-full bg-slate-100 border-2 border-white"
+            onerror="this.onerror=null; this.src='${fallbackAvatar}';"
+          />
+        </div>
+        <span class="inline-block px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold tracking-wide uppercase mb-2 border border-emerald-200/60">
+          ${m.jabatan}
+        </span>
+        <h3 class="font-bold text-slate-800 text-sm md:text-base group-hover:text-emerald-800 transition leading-snug">
+          ${m.nama}
+        </h3>
+        ${m.nidn ? `<p class="text-[11px] text-slate-400 font-mono mt-1">NIDN: ${m.nidn}</p>` : ''}
+        ${m.keterangan ? `<p class="text-xs text-slate-500 mt-2 line-clamp-2">${m.keterangan}</p>` : ''}
+      </div>
+      <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-100 text-center">
+        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Civitas Akademika</span>
+      </div>
+    </div>
+  `).join('');
 
   container.innerHTML = `
-    <div class="space-y-10">
-      <!-- Header Section -->
-      <div class="relative bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-950 rounded-3xl p-8 md:p-12 text-white shadow-2xl overflow-hidden border-b-4 border-amber-400">
-        <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="relative z-10 max-w-3xl">
-          <span class="px-3 py-1 bg-amber-400/20 text-amber-300 rounded-full text-xs font-semibold tracking-wider uppercase border border-amber-400/30">
-            Struktur Organisasi
-          </span>
-          <h1 class="text-2xl md:text-4xl font-extrabold mt-3 tracking-tight">
-            Pengelola & Civitas Akademika
-          </h1>
-          <p class="text-xs md:text-sm text-emerald-100/90 mt-2 leading-relaxed">
-            Susunan kepemimpinan dan dosen pengampu dalam menjaga mutu pendidikan serta sanad keilmuan perguruan tinggi.
+    <div class="max-w-6xl mx-auto space-y-8">
+      <div>
+        <button onclick="navigate('/profil')" class="text-xs font-semibold text-emerald-700 flex items-center gap-1 hover:underline mb-3">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Profil Lembaga
+        </button>
+        <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200 pb-5 gap-4">
+          <div>
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-widest">Struktur Organisasi</span>
+            <h1 class="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight mt-1">
+              Struktur Akademik & Pengelola
+            </h1>
+          </div>
+          <p class="text-xs text-slate-500 max-w-md">
+            Susunan pimpinan, dewan kiai, serta dosen pengampu perguruan tinggi.
           </p>
         </div>
       </div>
 
-      <!-- Grid Pengurus -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-        ${cardsHtml}
-      </div>
+      ${topLeaderHtml}
+
+      ${otherMembers.length > 0 ? `
+        <div class="space-y-4">
+          <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i data-lucide="users" class="w-5 h-5 text-emerald-700"></i>
+            Pengurus & Dosen Pengampu
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            ${memberCardsHtml}
+          </div>
+        </div>
+      ` : ''}
     </div>
   `;
 
