@@ -1830,7 +1830,7 @@ function applyTextFormat(fieldKey, command, extraVal = null) {
         const lines = selectedText.split('\n').filter(l => l.trim() !== '');
         formattedText = lines.map(line => {
           const cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
-          return `<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• ${cleanLine}</p>`;
+          return `<p style="padding-left: 1.0em; text-indent: -1.0em; margin-bottom: 0.5em;">• ${cleanLine}</p>`;
         }).join('\n');
       } else {
         formattedText = '<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 1</p>\n<p style="padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5em;">• Poin 2</p>';
